@@ -160,7 +160,27 @@ void ModelPickerRouting::createModel(const Data* data) {
     elements[0] = 1;
     elements[1] = -1;
     solver->addRow(colNames, elements, 0, 'E', "constraint 3.3");
-    
+
+    /*
+
+    Constraint 4
+
+    */
+    // x1 = x4 = 1 //(4)entrada e saida do vertice 0 tem que ser igual a 1
+    // x1 = 1 //(4) saida do vertice 0 igual a 1
+    colNames.resize(1);
+    elements.resize(1);
+    colNames[0] = x + lex(0);
+    elements[0] = 1;
+    solver->addRow(colNames, elements, 1, 'E', "constraint 4 out");
+
+    // x4 = 1 //(4) entrada do vertice 0 igual a 1
+    colNames.resize(1);
+    elements.resize(1);
+    colNames[0] = x + lex(3);
+    elements[0] = 1;
+    solver->addRow(colNames, elements, 1, 'E', "constraint 4 in");
+
     //x1 + 5*x2 <= 3
     //colNames.resize(2);
     //elements.resize(2);
