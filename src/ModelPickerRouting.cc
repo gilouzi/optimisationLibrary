@@ -39,9 +39,18 @@ void ModelPickerRouting::execute(const Data* data) {
 
 void ModelPickerRouting::printSolutionVariables(int digits, int decimals) {
     if (debug) {
+        vector<string> colNames;
+        colNames.resize(V);
+        colNames[0] = x + lex(0) + "_" + lex(2);
+        colNames[1] = x + lex(1) + "_" + lex(2);
+        colNames[2] = x + lex(1) + "_" + lex(3);
+        colNames[3] = x + lex(2) + "_" + lex(0);
+        colNames[4] = x + lex(2) + "_" + lex(1);
+        colNames[5] = x + lex(3) + "_" + lex(1);
         printf("\nSolution: \n");
         for (int i = 0; i < V; i++) {
-            printf("  x%d = %.0f\n", i, sol_x[i]);
+            std::cout << colNames[i] << " = ";
+            printf("%.0f\n", sol_x[i]);
     
         }
     }
@@ -67,9 +76,16 @@ void ModelPickerRouting::readSolution(const Data* data) {
         solution->setValue    (solver->getObjValue() );
         solution->setBestBound(solver->getBestBound());
 
-        for (int i = 0; i < V; i++) {
+        /*for (int i = 0; i < V; i++) {
             sol_x[i] = solver->getColValue(x + lex(i));
-        }
+        }*/
+
+        sol_x[0] = solver->getColValue(x + lex(0) + "_" + lex(2));
+        sol_x[1] = solver->getColValue(x + lex(1) + "_" + lex(2));
+        sol_x[2] = solver->getColValue(x + lex(1) + "_" + lex(3));
+        sol_x[3] = solver->getColValue(x + lex(2) + "_" + lex(0));
+        sol_x[4] = solver->getColValue(x + lex(2) + "_" + lex(1));
+        sol_x[5] = solver->getColValue(x + lex(3) + "_" + lex(1));
 
         // Para ler aresta 1-2
         //double xx = solver->getColValue(x + lex(1) + "_" lex(2));
@@ -88,8 +104,17 @@ void ModelPickerRouting::createModel(const Data* data) {
     Constraint 1
 
     */
-    for (int i = 0; i < V; i++)
-        solver->addBinaryVariable(dataCB->getArcsDistance(i), x + lex(i));
+    // min  30 * x0_2  +  10 * x1_2  +  10 * x1_3  +  30 * x2_0  +  10 * x2_1  +  10 * x3_1 //(1)aresta*edge -> quer minimizar esse caminho
+
+    //for (int i = 0; i < V; i++)
+    //    solver->addBinaryVariable(dataCB->getArcsDistance(i), x + lex(i));
+
+    solver->addBinaryVariable(30, x + lex(0) + "_" + lex(2));
+    solver->addBinaryVariable(10, x + lex(1) + "_" + lex(2));
+    solver->addBinaryVariable(10, x + lex(1) + "_" + lex(3));
+    solver->addBinaryVariable(30, x + lex(2) + "_" + lex(0));
+    solver->addBinaryVariable(10, x + lex(2) + "_" + lex(1));
+    solver->addBinaryVariable(10, x + lex(3) + "_" + lex(1));
 
     vector<string> colNames;
     vector<double> elements;
@@ -99,64 +124,64 @@ void ModelPickerRouting::createModel(const Data* data) {
     Constraint 2 
     
     */
-    // 0x1 + 1x2 + 1x3 + 0x4 + 0x5 + 0x6 >= 1 //(2)obrigatoriedade de pegar vertice 1
-    colNames.resize(V);
-    elements.resize(V);
-    for (int i = 0; i < V; i++) {
-        colNames[i] = x + lex(i);
-        elements[i] = dataCB->getArcsVertice1(i);
-    }
-    solver->addRow(colNames, elements, dataCB->getMinVisitVertice1(), 'G', "constraint 2");
+    // 1 * x1_2 + 1 * x_1_3 >= 1 //(2)obrigatoriedade de pegar vertice 1
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = x + lex(1) + "_" + lex(2);
+    colNames[1] = x + lex(1) + "_" + lex(3);
+    elements[0] = 1;
+    elements[1] = 1;
+    solver->addRow(colNames, elements, 1, 'G', "constraint 2");
 
     /*
 
     Constraint 3
 
     */
-    // x1 = x4 // (3)entrada e saida do vertice 0
-    // x1 - x4 = 0
+    // x0_2 = x2_0 // (3)entrada e saida do vertice 0
+    // x0_2 - x2_0 = 0
     colNames.resize(2);
     elements.resize(2);
-    colNames[0] = x + lex(0);            
-    colNames[1] = x + lex(3);
+    colNames[0] = x + lex(0) + "_" + lex(2);
+    colNames[1] = x + lex(2) + "_" + lex(0);
     elements[0] = 1;
     elements[1] = -1;
     solver->addRow(colNames, elements, 0, 'E', "constraint 3.0");
 
-    // x2 + x3 = x5 + x6 //(3)entrada e saida do vertice 1
-    // x2 + x3 - x5 - x6 = 0
+    // x1_2 + x1_3 = x2_1 + x3_1 //(3)entrada e saida do vertice 1
+    // x1_2 + x1_3 - x2_1 - x3_1 = 0
     colNames.resize(4);
     elements.resize(4);
-    colNames[0] = x + lex(1);
-    colNames[1] = x + lex(2);
-    colNames[2] = x + lex(4);
-    colNames[3] = x + lex(5);
+    colNames[0] = x + lex(1) + "_" + lex(2);
+    colNames[1] = x + lex(1) + "_" + lex(3);
+    colNames[2] = x + lex(2) + "_" + lex(1);
+    colNames[3] = x + lex(3) + "_" + lex(1);
     elements[0] = 1;
     elements[1] = 1;
     elements[2] = -1;
     elements[3] = -1;
     solver->addRow(colNames, elements, 0, 'E', "constraint 3.1");
 
-    // x4 + x5 = x1 + x2 //(3)entrada e saida do vertice 2
-    // x4 + x5 - x1 - x2 = 0 
+    // x2_0 + x2_1 = x0_2 + x1_2 //(3)entrada e saida do vertice 2
+    //  x2_0 + x2_1 - x0_2 - x1_2 = 0 
     colNames.resize(4);
     elements.resize(4);
-    colNames[0] = x + lex(3);
-    colNames[1] = x + lex(4);
-    colNames[2] = x + lex(0);
-    colNames[3] = x + lex(1);
+    colNames[0] = x + lex(2) + "_" + lex(0);
+    colNames[1] = x + lex(2) + "_" + lex(1);
+    colNames[2] = x + lex(0) + "_" + lex(2);
+    colNames[3] = x + lex(1) + "_" + lex(2);
     elements[0] = 1;
     elements[1] = 1;
     elements[2] = -1;
     elements[3] = -1;
     solver->addRow(colNames, elements, 0, 'E', "constraint 3.2");
 
-    // x6 = x3 //(3)entrada e saida do vertice 3
-    // x6 - x3 = 0
+    // x3_1 = x1_3 //(3)entrada e saida do vertice 3
+    // x3_1 - x1_3 = 0
     colNames.resize(2);
     elements.resize(2);
-    colNames[0] = x + lex(5);
-    colNames[1] = x + lex(2);
+    colNames[0] = x + lex(3) + "_" + lex(1);
+    colNames[1] = x + lex(1) + "_" + lex(3);
     elements[0] = 1;
     elements[1] = -1;
     solver->addRow(colNames, elements, 0, 'E', "constraint 3.3");
@@ -166,18 +191,18 @@ void ModelPickerRouting::createModel(const Data* data) {
     Constraint 4
 
     */
-    // x1 = x4 = 1 //(4)entrada e saida do vertice 0 tem que ser igual a 1
-    // x1 = 1 //(4) saida do vertice 0 igual a 1
+    // x0_2 = x2_0 = 1 //(4)entrada e saida do vertice 0 tem que ser igual a 1
+    // x0_2 = 1 //(4) saida do vertice 0 igual a 1
     colNames.resize(1);
     elements.resize(1);
-    colNames[0] = x + lex(0);
+    colNames[0] = x + lex(0) + "_" + lex(2);
     elements[0] = 1;
     solver->addRow(colNames, elements, 1, 'E', "constraint 4 out");
 
-    // x4 = 1 //(4) entrada do vertice 0 igual a 1
+    // x2_0 = 1 //(4) entrada do vertice 0 igual a 1
     colNames.resize(1);
     elements.resize(1);
-    colNames[0] = x + lex(3);
+    colNames[0] = x + lex(2) + "_" + lex(0);
     elements[0] = 1;
     solver->addRow(colNames, elements, 1, 'E', "constraint 4 in");
 
