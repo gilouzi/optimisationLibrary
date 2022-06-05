@@ -83,20 +83,83 @@ void ModelPickerRouting::createModel(const Data* data) {
     V = dataCB->getNumVariables();
     solver->changeObjectiveSense(0);
 
+    /*
+
+    Constraint 1
+
+    */
     for (int i = 0; i < V; i++)
         solver->addBinaryVariable(dataCB->getArcsDistance(i), x + lex(i));
 
     vector<string> colNames;
     vector<double> elements;
 
+    /* 
+    
+    Constraint 2 
+    
+    */
+    // 0x1 + 1x2 + 1x3 + 0x4 + 0x5 + 0x6 >= 1 //(2)obrigatoriedade de pegar vertice 1
     colNames.resize(V);
     elements.resize(V);
     for (int i = 0; i < V; i++) {
         colNames[i] = x + lex(i);
         elements[i] = dataCB->getArcsVertice1(i);
     }
-    solver->addRow(colNames, elements, dataCB->getMinVisitVertice1(), 'G', "constraint");
+    solver->addRow(colNames, elements, dataCB->getMinVisitVertice1(), 'G', "constraint 2");
 
+    /*
+
+    Constraint 3
+
+    */
+    // x1 = x4 // (3)entrada e saida do vertice 0
+    // x1 - x4 = 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = x + lex(0);            
+    colNames[1] = x + lex(3);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'E', "constraint 3.0");
+
+    // x2 + x3 = x5 + x6 //(3)entrada e saida do vertice 1
+    // x2 + x3 - x5 - x6 = 0
+    colNames.resize(4);
+    elements.resize(4);
+    colNames[0] = x + lex(1);
+    colNames[1] = x + lex(2);
+    colNames[2] = x + lex(4);
+    colNames[3] = x + lex(5);
+    elements[0] = 1;
+    elements[1] = 1;
+    elements[2] = -1;
+    elements[3] = -1;
+    solver->addRow(colNames, elements, 0, 'E', "constraint 3.1");
+
+    // x4 + x5 = x1 + x2 //(3)entrada e saida do vertice 2
+    // x4 + x5 - x1 - x2 = 0 
+    colNames.resize(4);
+    elements.resize(4);
+    colNames[0] = x + lex(3);
+    colNames[1] = x + lex(4);
+    colNames[2] = x + lex(0);
+    colNames[3] = x + lex(1);
+    elements[0] = 1;
+    elements[1] = 1;
+    elements[2] = -1;
+    elements[3] = -1;
+    solver->addRow(colNames, elements, 0, 'E', "constraint 3.2");
+
+    // x6 = x3 //(3)entrada e saida do vertice 3
+    // x6 - x3 = 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = x + lex(5);
+    colNames[1] = x + lex(2);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'E', "constraint 3.3");
     
     //x1 + 5*x2 <= 3
     //colNames.resize(2);

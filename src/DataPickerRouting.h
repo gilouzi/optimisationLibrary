@@ -17,6 +17,10 @@ class DataPickerRouting : public Data {
         // x_3_1 = x6
         // min  30x1 + 10x2 + 10x3 + 30x4 + 10x5 + 10x6
         // s.t. 0x1 +  1x2 + 1x3 + 0x4 + 0x5 + 0x6 >= 1 //(2)obrigatoriedade de pegar vertice 1
+        // x1 = x4 // (3)entrada e saida do vertice 0
+        // x2 + x3 = x5 + x6 //(3)entrada e saida do vertice 1
+        // x4 + x5 = x1 + x2 //(3)entrada e saida do vertice 2
+        // x6 = x3 //(3)entrada e saida do vertice 3
         // xj E {0, 1}, j = 1, ..., 6
         int numVariables;
         vector<int> arcsDistance;
