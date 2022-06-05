@@ -29,8 +29,8 @@ void DataPickerRouting::readData() {
     arcsVertice1[1] = 1;
     arcsVertice1[2] = 1;
     arcsVertice1[3] = 0;
-    arcsVertice1[4] = 1;
-    arcsVertice1[5] = 1;
+    arcsVertice1[4] = 0;
+    arcsVertice1[5] = 0;
 }
 
 void DataPickerRouting::print() {

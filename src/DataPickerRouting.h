@@ -9,8 +9,14 @@ class DataPickerRouting : public Data {
     private:
         
         // Data picker routing problem
+        // x_0_2 = x1
+        // x_1_2 = x2
+        // x_1_3 = x3
+        // x_2_0 = x4
+        // x_2_1 = x5
+        // x_3_1 = x6
         // min  30x1 + 10x2 + 10x3 + 30x4 + 10x5 + 10x6
-        // s.t. 0x1 +  1x2 + 1x3 + 0x4 + 1x5 + 1x6 >= 1
+        // s.t. 0x1 +  1x2 + 1x3 + 0x4 + 0x5 + 0x6 >= 1 //(2)obrigatoriedade de pegar vertice 1
         // xj E {0, 1}, j = 1, ..., 6
         int numVariables;
         vector<int> arcsDistance;
