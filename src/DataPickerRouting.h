@@ -26,6 +26,10 @@ class DataPickerRouting : public Data {
         // 
         // x0_2 = x2_0 = 1 //(4)entrada e saida do vertice 0 tem que ser igual a 1
         // 
+        // x0_2 = g0 //(5)outdegree do vertice 0
+        // x1_2 + x1_3 = g1 //(5)outdegree do vertice 1
+        // x2_0 + x2_1 = g2 //(5)outdegree do vertice 2
+        // x3_1 = g3 //(5)outdegree do vertice 3
         // 
         // xj E {0, 1}, j = 1, ..., 6
         int numVariables;

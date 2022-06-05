@@ -11,6 +11,7 @@
 ModelPickerRouting::ModelPickerRouting() : Model(){
     V = 0;
     x = "x";
+    g = "g";
 }
 
 ModelPickerRouting::~ModelPickerRouting() {
@@ -115,6 +116,10 @@ void ModelPickerRouting::createModel(const Data* data) {
     solver->addBinaryVariable(30, x + lex(2) + "_" + lex(0));
     solver->addBinaryVariable(10, x + lex(2) + "_" + lex(1));
     solver->addBinaryVariable(10, x + lex(3) + "_" + lex(1));
+    solver->addBinaryVariable(0, g + lex(0));
+    solver->addBinaryVariable(0, g + lex(1));
+    solver->addBinaryVariable(0, g + lex(2));
+    solver->addBinaryVariable(0, g + lex(3));
 
     vector<string> colNames;
     vector<double> elements;
@@ -205,6 +210,55 @@ void ModelPickerRouting::createModel(const Data* data) {
     colNames[0] = x + lex(2) + "_" + lex(0);
     elements[0] = 1;
     solver->addRow(colNames, elements, 1, 'E', "constraint 4 in");
+
+    /*
+
+       Constraint 5
+
+    */
+    // x0_2 = g0 //(5)outdegree do vertice 0
+    // x0_2 - g0 = 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = x + lex(0) + "_" + lex(2);
+    colNames[1] = g + lex(0);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'E', "constraint 5.0");
+
+    // x1_2 + x1_3 = g1 //(5)outdegree do vertice 1
+    // x1_2 + x1_3 - g1 = 0
+    colNames.resize(3);
+    elements.resize(3);
+    colNames[0] = x + lex(1) + "_" + lex(2);
+    colNames[1] = x + lex(1) + "_" + lex(3);
+    colNames[2] = g + lex(1);
+    elements[0] = 1;
+    elements[1] = 1;
+    elements[2] = -1;
+    solver->addRow(colNames, elements, 0, 'E', "constraint 5.1");
+
+    // x2_0 + x2_1 = g2 //(5)outdegree do vertice 2
+    // x2_0 + x2_1 - g2 = 0
+    colNames.resize(3);
+    elements.resize(3);
+    colNames[0] = x + lex(2) + "_" + lex(0);
+    colNames[1] = x + lex(2) + "_" + lex(1);
+    colNames[2] = g + lex(2);
+    elements[0] = 1;
+    elements[1] = 1;
+    elements[2] = -1;
+    solver->addRow(colNames, elements, 0, 'E', "constraint 5.2");
+
+    // x3_1 = g3 //(5)outdegree do vertice 3
+    // x3_1 - g3 = 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = x + lex(3) + "_" + lex(1);
+    colNames[1] = g + lex(3);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'E', "constraint 5.3");
 
     //x1 + 5*x2 <= 3
     //colNames.resize(2);
