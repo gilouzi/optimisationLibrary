@@ -121,6 +121,11 @@ void ModelPickerRouting::createModel(const Data* data) {
     solver->addBinaryVariable(0, g + lex(2));
     solver->addBinaryVariable(0, g + lex(3));
 
+    solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(0));
+    solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(1));
+    solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(2));
+    solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(3));
+
     vector<string> colNames;
     vector<double> elements;
 
