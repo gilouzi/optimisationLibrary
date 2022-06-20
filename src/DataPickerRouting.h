@@ -31,6 +31,13 @@ class DataPickerRouting : public Data {
         // x2_0 + x2_1 = g2 //(5)outdegree do vertice 2
         // x3_1 = g3 //(5)outdegree do vertice 3
         // 
+        // y0 >= x0_2 //(6)
+        // y1 >= x1_2 //(6)
+        // y1 >= x1_3 //(6)
+        // y2 >= x2_0 //(6)
+        // y2 >= x2_1 //(6)
+        // y3 >= x3_1 //(6)
+        // 
         // xj E {0, 1}, j = 1, ..., 6
         int numVariables;
         vector<int> arcsDistance;

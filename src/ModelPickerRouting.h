@@ -13,6 +13,7 @@ class ModelPickerRouting : public Model {
     
         // Variable names
         string x;
+        string y;
         string g;
         
         // Solution values

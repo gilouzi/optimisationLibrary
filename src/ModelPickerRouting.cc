@@ -11,6 +11,7 @@
 ModelPickerRouting::ModelPickerRouting() : Model(){
     V = 0;
     x = "x";
+    y = "y";
     g = "g";
 }
 
@@ -116,10 +117,11 @@ void ModelPickerRouting::createModel(const Data* data) {
     solver->addBinaryVariable(30, x + lex(2) + "_" + lex(0));
     solver->addBinaryVariable(10, x + lex(2) + "_" + lex(1));
     solver->addBinaryVariable(10, x + lex(3) + "_" + lex(1));
-    solver->addBinaryVariable(0, g + lex(0));
-    solver->addBinaryVariable(0, g + lex(1));
-    solver->addBinaryVariable(0, g + lex(2));
-    solver->addBinaryVariable(0, g + lex(3));
+
+    solver->addBinaryVariable(0, y + lex(0));
+    solver->addBinaryVariable(0, y + lex(1));
+    solver->addBinaryVariable(0, y + lex(2));
+    solver->addBinaryVariable(0, y + lex(3));
 
     solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(0));
     solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(1));
@@ -264,6 +266,69 @@ void ModelPickerRouting::createModel(const Data* data) {
     elements[0] = 1;
     elements[1] = -1;
     solver->addRow(colNames, elements, 0, 'E', "constraint 5.3");
+
+    /*
+
+        Constraint 6
+
+    */
+    //y0 >= x0_2 //(6)
+    // y0 - x0_2 >= 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = y + lex(0);
+    colNames[1] = x + lex(0) + "_" + lex(2);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'G', "constraint 6.0.0");
+    
+    // y1 >= x1_2 //(6)
+    // y1 - x1_2 >= 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = y + lex(1);
+    colNames[1] = x + lex(1) + "_" + lex(2);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'G', "constraint 6.1.0");
+
+    // y1 >= x1_3 //(6)
+    // y1 - x1_3 >= 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = y + lex(1);
+    colNames[1] = x + lex(1) + "_" + lex(2);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'G', "constraint 6.1.1");
+
+    // y2 >= x2_0 //(6)
+    // y2 - x2_0 >= 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = y + lex(2);
+    colNames[1] = x + lex(2) + "_" + lex(0);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'G', "constraint 6.2.0");
+    // y2 >= x2_1 //(6)
+    // y2 - x2_1 >= 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = y + lex(2);
+    colNames[1] = x + lex(2) + "_" + lex(1);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'G', "constraint 6.2.1");
+    // y3 >= x3_1 //(6)
+    // y3 - x3_1 >= 0
+    colNames.resize(2);
+    elements.resize(2);
+    colNames[0] = y + lex(3);
+    colNames[1] = x + lex(3) + "_" + lex(1);
+    elements[0] = 1;
+    elements[1] = -1;
+    solver->addRow(colNames, elements, 0, 'G', "constraint 6.3.0");
 
     //x1 + 5*x2 <= 3
     //colNames.resize(2);
