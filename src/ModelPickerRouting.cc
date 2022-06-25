@@ -135,11 +135,39 @@ void ModelPickerRouting::addVariableG(std::vector<int> verticesId) {
 }
 
 
+void ModelPickerRouting::addConstraintVerticesToVisit(Warehouse warehouse, std::vector<int> verticesToVisit) {
+    /*
+
+    Constraint 2
+
+    */
+    // 1 * x1_2 + 1 * x_1_3 >= 1 //(2)obrigatoriedade de pegar vertice 1
+
+    for (int id : verticesToVisit) {
+        //std::cout << "adding visit constraint " << id << std::endl;
+        std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
+        vector<string> colNames;
+        vector<double> elements;
+
+        for (Adjacency adjacency : adjacencyList) {
+            string colName = x + lex(id) + "_" + lex(adjacency.getId());
+            //std::cout << "adding colName " << colName << std::endl;
+            colNames.push_back(colName);
+            elements.push_back(1);
+        }
+
+        string constraintName = "constraint: vertice to visit" + lex(id);
+        solver->addRow(colNames, elements, 1, 'G', constraintName);
+    }
+}
+
+
 void ModelPickerRouting::createModel(const Data* data) {
     
     const DataPickerRouting* dataPickerRouting = dynamic_cast<const DataPickerRouting*>(data);
     Warehouse warehouse = dataPickerRouting->getWarehouse();
     std::vector<int> verticesId = dataPickerRouting->getVerticesId();
+    std::vector<int> verticesToVisit = dataPickerRouting->getVerticesToVisit();
 
     solver->changeObjectiveSense(0);
 
@@ -158,22 +186,11 @@ void ModelPickerRouting::createModel(const Data* data) {
     addBinaryVariableY(verticesId);
     addVariableG(verticesId);
 
+    addConstraintVerticesToVisit(warehouse, verticesToVisit);
+
     vector<string> colNames;
     vector<double> elements;
 
-    /* 
-    
-    Constraint 2 
-    
-    */
-    // 1 * x1_2 + 1 * x_1_3 >= 1 //(2)obrigatoriedade de pegar vertice 1
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = x + lex(1) + "_" + lex(2);
-    colNames[1] = x + lex(1) + "_" + lex(3);
-    elements[0] = 1;
-    elements[1] = 1;
-    solver->addRow(colNames, elements, 1, 'G', "constraint 2");
 
     /*
 
