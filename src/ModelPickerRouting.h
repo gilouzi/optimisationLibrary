@@ -28,6 +28,7 @@ class ModelPickerRouting : public Model {
         
         void addBinaryVariableX(Warehouse warehouse);
         void addBinaryVariableY(std::vector<int> verticesId);
+        void addVariableG(std::vector<int> verticesId);
         void printSolutionVariables(int digits = 5, int decimals = 2);
         
     public:

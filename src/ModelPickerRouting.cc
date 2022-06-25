@@ -123,6 +123,17 @@ void ModelPickerRouting::addBinaryVariableY(std::vector<int> verticesId) {
 }
 
 
+void ModelPickerRouting::addVariableG(std::vector<int> verticesId) {
+    int verticesIdSize = verticesId.size();
+    for (int i = 0; i < verticesIdSize; i++) {
+        int id = verticesId[i];
+        if (debug)
+            std::cout << "Adding variable " << g + lex(id) << std::endl;
+        solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(id));
+    }
+}
+
+
 void ModelPickerRouting::createModel(const Data* data) {
     
     const DataPickerRouting* dataPickerRouting = dynamic_cast<const DataPickerRouting*>(data);
@@ -146,11 +157,7 @@ void ModelPickerRouting::createModel(const Data* data) {
 
     //salvar todos os vertices com valor 0
     addBinaryVariableY(verticesId);
-
-    solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(0));
-    solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(1));
-    solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(2));
-    solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(3));
+    addVariableG(verticesId);
 
     vector<string> colNames;
     vector<double> elements;
