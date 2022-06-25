@@ -98,7 +98,8 @@ void ModelPickerRouting::readSolution(const Data* data) {
 void ModelPickerRouting::createModel(const Data* data) {
     
     const DataPickerRouting* dataCB = dynamic_cast<const DataPickerRouting*>(data);
-    V = dataCB->getNumVariables();
+    V = 6;
+
     solver->changeObjectiveSense(0);
 
     /*
@@ -111,6 +112,7 @@ void ModelPickerRouting::createModel(const Data* data) {
     //for (int i = 0; i < V; i++)
     //    solver->addBinaryVariable(dataCB->getArcsDistance(i), x + lex(i));
 
+    //salvar todas as arestas com respectivos pesos
     solver->addBinaryVariable(30, x + lex(0) + "_" + lex(2));
     solver->addBinaryVariable(10, x + lex(1) + "_" + lex(2));
     solver->addBinaryVariable(10, x + lex(1) + "_" + lex(3));
@@ -118,6 +120,7 @@ void ModelPickerRouting::createModel(const Data* data) {
     solver->addBinaryVariable(10, x + lex(2) + "_" + lex(1));
     solver->addBinaryVariable(10, x + lex(3) + "_" + lex(1));
 
+    //salvar todos os vertices com valor 0
     solver->addBinaryVariable(0, y + lex(0));
     solver->addBinaryVariable(0, y + lex(1));
     solver->addBinaryVariable(0, y + lex(2));
