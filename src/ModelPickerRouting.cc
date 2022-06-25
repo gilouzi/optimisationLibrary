@@ -111,10 +111,23 @@ void ModelPickerRouting::addBinaryVariableX(Warehouse warehouse) {
     }
 }
 
+
+void ModelPickerRouting::addBinaryVariableY(std::vector<int> verticesId) {
+    int verticesIdSize = verticesId.size();
+    for (int i = 0; i < verticesIdSize; i++) {
+        int id = verticesId[i];
+        if (debug)
+            std::cout << "Adding binary variable " << y + lex(id) << std::endl;
+        solver->addBinaryVariable(0, y + lex(id));
+    }
+}
+
+
 void ModelPickerRouting::createModel(const Data* data) {
     
     const DataPickerRouting* dataPickerRouting = dynamic_cast<const DataPickerRouting*>(data);
     Warehouse warehouse = dataPickerRouting->getWarehouse();
+    std::vector<int> verticesId = dataPickerRouting->getVerticesId();
     
     V = 6;
 
@@ -132,10 +145,7 @@ void ModelPickerRouting::createModel(const Data* data) {
 
 
     //salvar todos os vertices com valor 0
-    solver->addBinaryVariable(0, y + lex(0));
-    solver->addBinaryVariable(0, y + lex(1));
-    solver->addBinaryVariable(0, y + lex(2));
-    solver->addBinaryVariable(0, y + lex(3));
+    addBinaryVariableY(verticesId);
 
     solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(0));
     solver->addVariable(std::numeric_limits<double>::min(), std::numeric_limits<double>::max(), 0, g + lex(1));
