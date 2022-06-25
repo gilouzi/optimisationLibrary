@@ -36,6 +36,18 @@ std::vector<Adjacency> Warehouse::getAllAdjacencies(int id)
     return warehouseAdjacencyList[id];
 }
 
+std::vector<int> Warehouse::getVerticesWithAdjacency()
+{   
+    std::vector<int> verticesWithAdjacency;
+    int size = getSize();
+    for (int i = 0; i < size; i++) {
+        if (getSize(i) != 0) {
+            verticesWithAdjacency.push_back(i);
+        }
+    }
+    return verticesWithAdjacency;
+}
+
 void Warehouse::removeAdjacency(int id_1, int id_2)
 {
     int size_1 = getSize(id_1);

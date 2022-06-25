@@ -23,6 +23,8 @@ public:
     Adjacency getAdjacency(int id_1, int id_2);
     WarehouseAdjacencyList getWarehouseAdjacencyList();
     std::vector<Adjacency> getAllAdjacencies(int id);
+    std::vector<int> getVerticesWithAdjacency();
+
 
     void addNewAdjacency(int id_1, int id_2, float distance);
 
