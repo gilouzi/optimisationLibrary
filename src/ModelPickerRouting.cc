@@ -9,7 +9,7 @@
 // If dataModelPickerRouting was a reference
 //ModelPickerRouting::ModelPickerRouting(DataModelPickerRouting& i) : Model(), dataModelPickerRouting(i) {
 ModelPickerRouting::ModelPickerRouting() : Model(){
-    V = 0;
+    xVariableCount = 0;
     x = "x";
     y = "y";
     g = "g";
@@ -42,7 +42,7 @@ void ModelPickerRouting::execute(const Data* data) {
 void ModelPickerRouting::printSolutionVariables(int digits, int decimals) {
     if (debug) {
         vector<string> colNames;
-        colNames.resize(V);
+        colNames.resize(xVariableCount);
         colNames[0] = x + lex(0) + "_" + lex(2);
         colNames[1] = x + lex(1) + "_" + lex(2);
         colNames[2] = x + lex(1) + "_" + lex(3);
@@ -50,7 +50,7 @@ void ModelPickerRouting::printSolutionVariables(int digits, int decimals) {
         colNames[4] = x + lex(2) + "_" + lex(1);
         colNames[5] = x + lex(3) + "_" + lex(1);
         printf("\nSolution: \n");
-        for (int i = 0; i < V; i++) {
+        for (int i = 0; i < xVariableCount; i++) {
             std::cout << colNames[i] << " = ";
             printf("%.0f\n", sol_x[i]);
     
@@ -62,7 +62,7 @@ void ModelPickerRouting::printSolutionVariables(int digits, int decimals) {
 
 
 void ModelPickerRouting::reserveSolutionSpace(const Data* data) {
-    sol_x.resize(V);
+    sol_x.resize(xVariableCount);
 }
 
 
@@ -106,6 +106,7 @@ void ModelPickerRouting::addBinaryVariableX(Warehouse warehouse) {
             if (debug)
                 std::cout << "Adding binary variable " << x + lex(i) + "_" + lex(id) << ": " << distance << std::endl;
             solver->addBinaryVariable(distance, x + lex(i) + "_" + lex(id));
+            xVariableCount += 1;
         }
 
     }
@@ -139,8 +140,6 @@ void ModelPickerRouting::createModel(const Data* data) {
     const DataPickerRouting* dataPickerRouting = dynamic_cast<const DataPickerRouting*>(data);
     Warehouse warehouse = dataPickerRouting->getWarehouse();
     std::vector<int> verticesId = dataPickerRouting->getVerticesId();
-    
-    V = 6;
 
     solver->changeObjectiveSense(0);
 

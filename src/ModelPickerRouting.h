@@ -18,7 +18,7 @@ class ModelPickerRouting : public Model {
         string g;
         
         // Solution values
-        int V;
+        int xVariableCount;
         vector<double> sol_x;
 
         virtual void reserveSolutionSpace(const Data* data);
