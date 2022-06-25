@@ -95,9 +95,27 @@ void ModelPickerRouting::readSolution(const Data* data) {
 }
 
 
+void ModelPickerRouting::addBinaryVariableX(Warehouse warehouse) {
+    int warehouseSize = warehouse.getSize();
+
+    for (int i = 0; i < warehouseSize; i++) {
+        std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(i);
+        for (Adjacency adjacency : adjacencyList) {
+            double distance = adjacency.getDistance();
+            int id = adjacency.getId();
+            if (debug)
+                std::cout << "Adding binary variable " << x + lex(i) + "_" + lex(id) << ": " << distance << std::endl;
+            solver->addBinaryVariable(distance, x + lex(i) + "_" + lex(id));
+        }
+
+    }
+}
+
 void ModelPickerRouting::createModel(const Data* data) {
     
-    const DataPickerRouting* dataCB = dynamic_cast<const DataPickerRouting*>(data);
+    const DataPickerRouting* dataPickerRouting = dynamic_cast<const DataPickerRouting*>(data);
+    Warehouse warehouse = dataPickerRouting->getWarehouse();
+    
     V = 6;
 
     solver->changeObjectiveSense(0);
@@ -109,16 +127,9 @@ void ModelPickerRouting::createModel(const Data* data) {
     */
     // min  30 * x0_2  +  10 * x1_2  +  10 * x1_3  +  30 * x2_0  +  10 * x2_1  +  10 * x3_1 //(1)aresta*edge -> quer minimizar esse caminho
 
-    //for (int i = 0; i < V; i++)
-    //    solver->addBinaryVariable(dataCB->getArcsDistance(i), x + lex(i));
-
     //salvar todas as arestas com respectivos pesos
-    solver->addBinaryVariable(30, x + lex(0) + "_" + lex(2));
-    solver->addBinaryVariable(10, x + lex(1) + "_" + lex(2));
-    solver->addBinaryVariable(10, x + lex(1) + "_" + lex(3));
-    solver->addBinaryVariable(30, x + lex(2) + "_" + lex(0));
-    solver->addBinaryVariable(10, x + lex(2) + "_" + lex(1));
-    solver->addBinaryVariable(10, x + lex(3) + "_" + lex(1));
+    addBinaryVariableX(warehouse);
+
 
     //salvar todos os vertices com valor 0
     solver->addBinaryVariable(0, y + lex(0));

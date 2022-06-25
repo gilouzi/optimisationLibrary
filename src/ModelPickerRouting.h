@@ -3,6 +3,7 @@
 
 #include "Model.h"
 #include "Solution.h"
+#include "Warehouse.h"
 
 /**
  * Branch and cut with formulation for incomplete graph
@@ -25,6 +26,7 @@ class ModelPickerRouting : public Model {
         virtual void assignWarmStart     (const Data* data);
         virtual void createModel         (const Data* data);
         
+        void addBinaryVariableX(Warehouse warehouse);
         void printSolutionVariables(int digits = 5, int decimals = 2);
         
     public:
