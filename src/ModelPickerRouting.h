@@ -32,6 +32,8 @@ class ModelPickerRouting : public Model {
         void addConstraintVerticesToVisit(Warehouse warehouse, std::vector<int> verticesToVisit);
         void addConstraintVerticeInAndOutMustBeEqual(Warehouse warehouse, std::vector<int> verticesId);
         void addConstraintInAndOutOfVerticeZeroMustBeOne(Warehouse warehouse);
+        void addConstraintSetVerticesOutdegree(Warehouse warehouse, std::vector<int> verticesId);
+        void addConstraintSetVerticesYVariable(Warehouse warehouse, std::vector<int> verticesId);
         void printSolutionVariables(int digits = 5, int decimals = 2);
         
     public:

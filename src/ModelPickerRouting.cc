@@ -96,6 +96,12 @@ void ModelPickerRouting::readSolution(const Data* data) {
 
 
 void ModelPickerRouting::addBinaryVariableX(Warehouse warehouse) {
+    /*
+
+    Constraint 1
+
+    */
+    // min  30 * x0_2  +  10 * x1_2  +  10 * x1_3  +  30 * x2_0  +  10 * x2_1  +  10 * x3_1 //(1)aresta*edge -> quer minimizar esse caminho
     int warehouseSize = warehouse.getSize();
 
     for (int i = 0; i < warehouseSize; i++) {
@@ -144,14 +150,12 @@ void ModelPickerRouting::addConstraintVerticesToVisit(Warehouse warehouse, std::
     // 1 * x1_2 + 1 * x_1_3 >= 1 //(2)obrigatoriedade de pegar vertice 1
 
     for (int id : verticesToVisit) {
-        //std::cout << "adding visit constraint " << id << std::endl;
         std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
         vector<string> colNames;
         vector<double> elements;
 
         for (Adjacency adjacency : adjacencyList) {
             string colName = x + lex(id) + "_" + lex(adjacency.getId());
-            //std::cout << "adding colName " << colName << std::endl;
             colNames.push_back(colName);
             elements.push_back(1);
         }
@@ -171,7 +175,6 @@ void ModelPickerRouting::addConstraintVerticeInAndOutMustBeEqual(Warehouse wareh
     // x1_2 + x1_3 - x2_1 - x3_1 = 0
 
     for (int id : verticesId) {
-        //std::cout << "adding visit constraint " << id << std::endl;
         std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
         vector<string> colNames;
         vector<double> elements;
@@ -183,7 +186,6 @@ void ModelPickerRouting::addConstraintVerticeInAndOutMustBeEqual(Warehouse wareh
             elements.push_back(1);
 
             colName = x + lex(adjacency_id) + "_" + lex(id);
-            //std::cout << "adding colName " << colName << std::endl;
             colNames.push_back(colName);
             elements.push_back(-1);
         }
@@ -231,6 +233,64 @@ void ModelPickerRouting::addConstraintInAndOutOfVerticeZeroMustBeOne(Warehouse w
 }
 
 
+void ModelPickerRouting::addConstraintSetVerticesOutdegree(Warehouse warehouse, std::vector<int> verticesId) {
+    /*
+
+       Constraint 5
+
+    */
+
+    // x1_2 + x1_3 = g1 //(5)outdegree do vertice 1
+    // x1_2 + x1_3 - g1 = 0
+
+    for (int id : verticesId) {
+        std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
+        vector<string> colNames;
+        vector<double> elements;
+
+        for (Adjacency adjacency : adjacencyList) {
+            string colName = x + lex(id) + "_" + lex(adjacency.getId());
+            colNames.push_back(colName);
+            elements.push_back(1);
+        }
+
+        colNames.push_back(g + lex(id));
+        elements.push_back(-1);
+
+        string constraintName = "constraint: vertice " + lex(id) + " outdegree";
+        solver->addRow(colNames, elements, 0, 'E', constraintName);
+    }
+}
+
+
+void ModelPickerRouting::addConstraintSetVerticesYVariable(Warehouse warehouse, std::vector<int> verticesId) {
+    /*
+
+        Constraint 6
+
+    */
+    // y1 >= x1_2 //(6)
+    // y1 - x1_2 >= 0
+
+    for (int id : verticesId) {
+        std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
+        vector<string> colNames;
+        vector<double> elements;
+
+        for (Adjacency adjacency : adjacencyList) {
+            string colName = x + lex(id) + "_" + lex(adjacency.getId());
+            colNames.push_back(colName);
+            elements.push_back(-1);
+            colNames.push_back(y + lex(id));
+            elements.push_back(1);
+
+            string constraintName = "constraint: y" + lex(id) + ">= " + colName;
+            solver->addRow(colNames, elements, 0, 'G', constraintName);
+        }
+    }
+}
+
+
 void ModelPickerRouting::createModel(const Data* data) {
     
     const DataPickerRouting* dataPickerRouting = dynamic_cast<const DataPickerRouting*>(data);
@@ -239,13 +299,6 @@ void ModelPickerRouting::createModel(const Data* data) {
     std::vector<int> verticesToVisit = dataPickerRouting->getVerticesToVisit();
 
     solver->changeObjectiveSense(0);
-
-    /*
-
-    Constraint 1
-
-    */
-    // min  30 * x0_2  +  10 * x1_2  +  10 * x1_3  +  30 * x2_0  +  10 * x2_1  +  10 * x3_1 //(1)aresta*edge -> quer minimizar esse caminho
 
     //salvar todas as arestas com respectivos pesos
     addBinaryVariableX(warehouse);
@@ -258,145 +311,8 @@ void ModelPickerRouting::createModel(const Data* data) {
     addConstraintVerticesToVisit(warehouse, verticesToVisit);
     addConstraintVerticeInAndOutMustBeEqual(warehouse, verticesId);
     addConstraintInAndOutOfVerticeZeroMustBeOne(warehouse);
-
-    vector<string> colNames;
-    vector<double> elements;
-    /*
-
-       Constraint 5
-
-    */
-    // x0_2 = g0 //(5)outdegree do vertice 0
-    // x0_2 - g0 = 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = x + lex(0) + "_" + lex(2);
-    colNames[1] = g + lex(0);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'E', "constraint 5.0");
-
-    // x1_2 + x1_3 = g1 //(5)outdegree do vertice 1
-    // x1_2 + x1_3 - g1 = 0
-    colNames.resize(3);
-    elements.resize(3);
-    colNames[0] = x + lex(1) + "_" + lex(2);
-    colNames[1] = x + lex(1) + "_" + lex(3);
-    colNames[2] = g + lex(1);
-    elements[0] = 1;
-    elements[1] = 1;
-    elements[2] = -1;
-    solver->addRow(colNames, elements, 0, 'E', "constraint 5.1");
-
-    // x2_0 + x2_1 = g2 //(5)outdegree do vertice 2
-    // x2_0 + x2_1 - g2 = 0
-    colNames.resize(3);
-    elements.resize(3);
-    colNames[0] = x + lex(2) + "_" + lex(0);
-    colNames[1] = x + lex(2) + "_" + lex(1);
-    colNames[2] = g + lex(2);
-    elements[0] = 1;
-    elements[1] = 1;
-    elements[2] = -1;
-    solver->addRow(colNames, elements, 0, 'E', "constraint 5.2");
-
-    // x3_1 = g3 //(5)outdegree do vertice 3
-    // x3_1 - g3 = 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = x + lex(3) + "_" + lex(1);
-    colNames[1] = g + lex(3);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'E', "constraint 5.3");
-
-    /*
-
-        Constraint 6
-
-    */
-    //y0 >= x0_2 //(6)
-    // y0 - x0_2 >= 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = y + lex(0);
-    colNames[1] = x + lex(0) + "_" + lex(2);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'G', "constraint 6.0.0");
-    
-    // y1 >= x1_2 //(6)
-    // y1 - x1_2 >= 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = y + lex(1);
-    colNames[1] = x + lex(1) + "_" + lex(2);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'G', "constraint 6.1.0");
-
-    // y1 >= x1_3 //(6)
-    // y1 - x1_3 >= 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = y + lex(1);
-    colNames[1] = x + lex(1) + "_" + lex(2);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'G', "constraint 6.1.1");
-
-    // y2 >= x2_0 //(6)
-    // y2 - x2_0 >= 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = y + lex(2);
-    colNames[1] = x + lex(2) + "_" + lex(0);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'G', "constraint 6.2.0");
-    // y2 >= x2_1 //(6)
-    // y2 - x2_1 >= 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = y + lex(2);
-    colNames[1] = x + lex(2) + "_" + lex(1);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'G', "constraint 6.2.1");
-    // y3 >= x3_1 //(6)
-    // y3 - x3_1 >= 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = y + lex(3);
-    colNames[1] = x + lex(3) + "_" + lex(1);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'G', "constraint 6.3.0");
-
-    //x1 + 5*x2 <= 3
-    //colNames.resize(2);
-    //elements.resize(2);
-    //colNames[0] = x + lex(1);            
-    //colNames[1] = x + lex(2);
-    //elements[0] = 1;
-    //elements[1] = 5;
-    //solver->addRow(colNames, elements, 3, 'L', "restricaoExemplo");
-
-    // Suponha o lista de adjacencia:
-    //vector<vector<int>>vvv;
-    //0: 1 2
-    //1: 2
-    //2: 3       
-    //3
-    // Criar variavel para cada aresta:
-    //for (int i  = 0; i < (int) vvv.size(); i++) {
-    //    for (int j = 0; j < (int) vvv[i].size(); j++) {
-    //        solver->addBinaryVariable(1, x + lex(i) + "_" + lex(vvv[i][j]);
-    //    }
-    //}
-
-
-
+    addConstraintSetVerticesOutdegree(warehouse, verticesId);
+    addConstraintSetVerticesYVariable(warehouse, verticesId);
 }
 
 
