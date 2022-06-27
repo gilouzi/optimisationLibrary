@@ -30,6 +30,7 @@ class ModelPickerRouting : public Model {
         void addBinaryVariableY(std::vector<int> verticesId);
         void addVariableG(std::vector<int> verticesId);
         void addConstraintVerticesToVisit(Warehouse warehouse, std::vector<int> verticesToVisit);
+        void addConstraintVerticeInAndOutMustBeEqual(Warehouse warehouse, std::vector<int> verticesId);
         void printSolutionVariables(int digits = 5, int decimals = 2);
         
     public:

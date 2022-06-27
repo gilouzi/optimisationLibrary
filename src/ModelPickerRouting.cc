@@ -161,6 +161,38 @@ void ModelPickerRouting::addConstraintVerticesToVisit(Warehouse warehouse, std::
     }
 }
 
+void ModelPickerRouting::addConstraintVerticeInAndOutMustBeEqual(Warehouse warehouse, std::vector<int> verticesId) {
+    /*
+
+    Constraint 3
+
+    */
+    // x1_2 + x1_3 = x2_1 + x3_1 //(3)entrada e saida do vertice 1
+    // x1_2 + x1_3 - x2_1 - x3_1 = 0
+
+    for (int id : verticesId) {
+        //std::cout << "adding visit constraint " << id << std::endl;
+        std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
+        vector<string> colNames;
+        vector<double> elements;
+
+        for (Adjacency adjacency : adjacencyList) {
+            int adjacency_id = adjacency.getId();
+            string colName = x + lex(id) + "_" + lex(adjacency_id);
+            colNames.push_back(colName);
+            elements.push_back(1);
+
+            colName = x + lex(adjacency_id) + "_" + lex(id);
+            //std::cout << "adding colName " << colName << std::endl;
+            colNames.push_back(colName);
+            elements.push_back(-1);
+        }
+
+        string constraintName = "constraint: vertice " + lex(id) + " in and out must be equal";
+        solver->addRow(colNames, elements, 0, 'E', constraintName);
+    }
+}
+
 
 void ModelPickerRouting::createModel(const Data* data) {
     
@@ -187,63 +219,12 @@ void ModelPickerRouting::createModel(const Data* data) {
     addVariableG(verticesId);
 
     addConstraintVerticesToVisit(warehouse, verticesToVisit);
+    addConstraintVerticeInAndOutMustBeEqual(warehouse, verticesId);
 
     vector<string> colNames;
     vector<double> elements;
 
 
-    /*
-
-    Constraint 3
-
-    */
-    // x0_2 = x2_0 // (3)entrada e saida do vertice 0
-    // x0_2 - x2_0 = 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = x + lex(0) + "_" + lex(2);
-    colNames[1] = x + lex(2) + "_" + lex(0);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'E', "constraint 3.0");
-
-    // x1_2 + x1_3 = x2_1 + x3_1 //(3)entrada e saida do vertice 1
-    // x1_2 + x1_3 - x2_1 - x3_1 = 0
-    colNames.resize(4);
-    elements.resize(4);
-    colNames[0] = x + lex(1) + "_" + lex(2);
-    colNames[1] = x + lex(1) + "_" + lex(3);
-    colNames[2] = x + lex(2) + "_" + lex(1);
-    colNames[3] = x + lex(3) + "_" + lex(1);
-    elements[0] = 1;
-    elements[1] = 1;
-    elements[2] = -1;
-    elements[3] = -1;
-    solver->addRow(colNames, elements, 0, 'E', "constraint 3.1");
-
-    // x2_0 + x2_1 = x0_2 + x1_2 //(3)entrada e saida do vertice 2
-    //  x2_0 + x2_1 - x0_2 - x1_2 = 0 
-    colNames.resize(4);
-    elements.resize(4);
-    colNames[0] = x + lex(2) + "_" + lex(0);
-    colNames[1] = x + lex(2) + "_" + lex(1);
-    colNames[2] = x + lex(0) + "_" + lex(2);
-    colNames[3] = x + lex(1) + "_" + lex(2);
-    elements[0] = 1;
-    elements[1] = 1;
-    elements[2] = -1;
-    elements[3] = -1;
-    solver->addRow(colNames, elements, 0, 'E', "constraint 3.2");
-
-    // x3_1 = x1_3 //(3)entrada e saida do vertice 3
-    // x3_1 - x1_3 = 0
-    colNames.resize(2);
-    elements.resize(2);
-    colNames[0] = x + lex(3) + "_" + lex(1);
-    colNames[1] = x + lex(1) + "_" + lex(3);
-    elements[0] = 1;
-    elements[1] = -1;
-    solver->addRow(colNames, elements, 0, 'E', "constraint 3.3");
 
     /*
 
