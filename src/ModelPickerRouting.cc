@@ -194,6 +194,43 @@ void ModelPickerRouting::addConstraintVerticeInAndOutMustBeEqual(Warehouse wareh
 }
 
 
+void ModelPickerRouting::addConstraintInAndOutOfVerticeZeroMustBeOne(Warehouse warehouse) {
+    /*
+
+     Constraint 4
+
+     */
+     // x0_2 + x0_4 = x2_0 + x4_0 = 1 //(4)entrada e saida do vertice 0 tem que ser igual a 1
+     // x0_2 + x0_4 = 1 //(4) saida do vertice 0 igual a 1
+    //  x2_0 + x4_0 = 1 //(4) entrada do vertice 0 igual a 1
+
+    std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(0);
+    vector<string> colNamesIn;
+    vector<double> elementsIn;
+
+    vector<string> colNamesOut;
+    vector<double> elementsOut;
+
+    for (Adjacency adjacency : adjacencyList) {
+        int adjacency_id = adjacency.getId();
+        string colNameIn = x + lex(0) + "_" + lex(adjacency_id);
+        colNamesIn.push_back(colNameIn);
+        elementsIn.push_back(1);
+
+        string colNameOut = x + lex(adjacency_id) + "_" + lex(0);
+        colNamesOut.push_back(colNameOut);
+        elementsOut.push_back(1);
+    }
+
+    string constraintName = "constraint: vertice 0 'in' must be one";
+    solver->addRow(colNamesIn, elementsIn, 1, 'E', constraintName);
+
+    constraintName = "constraint: vertice 0 'out' must be one";
+    solver->addRow(colNamesOut, elementsOut, 1, 'E', constraintName);
+    
+}
+
+
 void ModelPickerRouting::createModel(const Data* data) {
     
     const DataPickerRouting* dataPickerRouting = dynamic_cast<const DataPickerRouting*>(data);
@@ -213,39 +250,17 @@ void ModelPickerRouting::createModel(const Data* data) {
     //salvar todas as arestas com respectivos pesos
     addBinaryVariableX(warehouse);
 
-
     //salvar todos os vertices com valor 0
     addBinaryVariableY(verticesId);
     addVariableG(verticesId);
 
+    //adicionar as restricoes
     addConstraintVerticesToVisit(warehouse, verticesToVisit);
     addConstraintVerticeInAndOutMustBeEqual(warehouse, verticesId);
+    addConstraintInAndOutOfVerticeZeroMustBeOne(warehouse);
 
     vector<string> colNames;
     vector<double> elements;
-
-
-
-    /*
-
-    Constraint 4
-
-    */
-    // x0_2 = x2_0 = 1 //(4)entrada e saida do vertice 0 tem que ser igual a 1
-    // x0_2 = 1 //(4) saida do vertice 0 igual a 1
-    colNames.resize(1);
-    elements.resize(1);
-    colNames[0] = x + lex(0) + "_" + lex(2);
-    elements[0] = 1;
-    solver->addRow(colNames, elements, 1, 'E', "constraint 4 out");
-
-    // x2_0 = 1 //(4) entrada do vertice 0 igual a 1
-    colNames.resize(1);
-    elements.resize(1);
-    colNames[0] = x + lex(2) + "_" + lex(0);
-    elements[0] = 1;
-    solver->addRow(colNames, elements, 1, 'E', "constraint 4 in");
-
     /*
 
        Constraint 5
