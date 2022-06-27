@@ -36,20 +36,60 @@ void DataPickerRouting::readData() {
     */
 
     //mock:
-    Warehouse warehouse(4);
+    Warehouse warehouse(12);
 
-    warehouse.addNewAdjacency(0, 2, 30);
-    warehouse.addNewAdjacency(2, 0, 30);
+    warehouse.addNewAdjacency(0, 6, 10);
+    warehouse.addNewAdjacency(6, 0, 10);
 
-    warehouse.addNewAdjacency(2, 1, 10);
-    warehouse.addNewAdjacency(1, 2, 10);
+    warehouse.addNewAdjacency(0, 7, 20);
+    warehouse.addNewAdjacency(7, 0, 20); 
+    
+    warehouse.addNewAdjacency(0, 8, 30);
+    warehouse.addNewAdjacency(8, 0, 30);
 
-    warehouse.addNewAdjacency(1, 3, 10);
-    warehouse.addNewAdjacency(3, 1, 10);
+    warehouse.addNewAdjacency(6, 7, 10);
+    warehouse.addNewAdjacency(7, 6, 10);
+
+    warehouse.addNewAdjacency(6, 1, 15);
+    warehouse.addNewAdjacency(1, 6, 15);
+
+    warehouse.addNewAdjacency(1, 9, 15);
+    warehouse.addNewAdjacency(9, 1, 15);
+
+    warehouse.addNewAdjacency(9, 10, 10);
+    warehouse.addNewAdjacency(10, 9, 10);
+
+    warehouse.addNewAdjacency(7, 2, 10);
+    warehouse.addNewAdjacency(2, 7, 10);
+
+    warehouse.addNewAdjacency(7, 8, 30);
+    warehouse.addNewAdjacency(8, 7, 30);
+
+    warehouse.addNewAdjacency(2, 10, 20);
+    warehouse.addNewAdjacency(10, 2, 20);
+
+    warehouse.addNewAdjacency(10, 11, 30);
+    warehouse.addNewAdjacency(11, 10, 30);
+
+    warehouse.addNewAdjacency(8, 3, 15);
+    warehouse.addNewAdjacency(3, 8, 15);
+
+    warehouse.addNewAdjacency(3, 4, 5);
+    warehouse.addNewAdjacency(4, 3, 5);
+
+    warehouse.addNewAdjacency(4, 5, 5);
+    warehouse.addNewAdjacency(5, 4, 5);
+
+    warehouse.addNewAdjacency(5, 11, 5);
+    warehouse.addNewAdjacency(11, 5, 5);
 
     this->warehouse = warehouse;
 
     verticesToVisit.push_back(1);
+    verticesToVisit.push_back(2);
+    verticesToVisit.push_back(3);
+    verticesToVisit.push_back(4);
+    verticesToVisit.push_back(5);
 
     verticesId = warehouse.getVerticesWithAdjacency();
 
