@@ -20,6 +20,7 @@ class ModelPickerRouting : public Model {
         // Solution values
         int xVariableCount;
         vector<double> sol_x;
+        vector<string> sol_x_names;
 
         virtual void reserveSolutionSpace(const Data* data);
         virtual void readSolution        (const Data* data);

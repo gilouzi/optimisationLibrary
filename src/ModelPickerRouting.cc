@@ -41,22 +41,12 @@ void ModelPickerRouting::execute(const Data* data) {
 
 void ModelPickerRouting::printSolutionVariables(int digits, int decimals) {
     if (debug) {
-        vector<string> colNames;
-        colNames.resize(xVariableCount);
-        colNames[0] = x + lex(0) + "_" + lex(2);
-        colNames[1] = x + lex(1) + "_" + lex(2);
-        colNames[2] = x + lex(1) + "_" + lex(3);
-        colNames[3] = x + lex(2) + "_" + lex(0);
-        colNames[4] = x + lex(2) + "_" + lex(1);
-        colNames[5] = x + lex(3) + "_" + lex(1);
         printf("\nSolution: \n");
         for (int i = 0; i < xVariableCount; i++) {
-            std::cout << colNames[i] << " = ";
+            std::cout << sol_x_names[i] << " = ";
             printf("%.0f\n", sol_x[i]);
-    
         }
     }
-
 }
 
 
@@ -78,19 +68,9 @@ void ModelPickerRouting::readSolution(const Data* data) {
         solution->setValue    (solver->getObjValue() );
         solution->setBestBound(solver->getBestBound());
 
-        /*for (int i = 0; i < V; i++) {
-            sol_x[i] = solver->getColValue(x + lex(i));
-        }*/
-
-        sol_x[0] = solver->getColValue(x + lex(0) + "_" + lex(2));
-        sol_x[1] = solver->getColValue(x + lex(1) + "_" + lex(2));
-        sol_x[2] = solver->getColValue(x + lex(1) + "_" + lex(3));
-        sol_x[3] = solver->getColValue(x + lex(2) + "_" + lex(0));
-        sol_x[4] = solver->getColValue(x + lex(2) + "_" + lex(1));
-        sol_x[5] = solver->getColValue(x + lex(3) + "_" + lex(1));
-
-        // Para ler aresta 1-2
-        //double xx = solver->getColValue(x + lex(1) + "_" lex(2));
+        for (int i = 0; i < xVariableCount; i++) {
+            sol_x[i] = solver->getColValue(sol_x_names[i]);
+        }
     }
 }
 
@@ -102,6 +82,10 @@ void ModelPickerRouting::addBinaryVariableX(Warehouse warehouse) {
 
     */
     // min  30 * x0_2  +  10 * x1_2  +  10 * x1_3  +  30 * x2_0  +  10 * x2_1  +  10 * x3_1 //(1)aresta*edge -> quer minimizar esse caminho
+
+    if (debug)
+        std::cout << "addBinaryVariableX" << std::endl;
+
     int warehouseSize = warehouse.getSize();
 
     for (int i = 0; i < warehouseSize; i++) {
@@ -111,7 +95,9 @@ void ModelPickerRouting::addBinaryVariableX(Warehouse warehouse) {
             int id = adjacency.getId();
             if (debug)
                 std::cout << "Adding binary variable " << x + lex(i) + "_" + lex(id) << ": " << distance << std::endl;
-            solver->addBinaryVariable(distance, x + lex(i) + "_" + lex(id));
+            string variableName = x + lex(i) + "_" + lex(id);
+            solver->addBinaryVariable(distance, variableName);
+            sol_x_names.push_back(variableName);
             xVariableCount += 1;
         }
 
@@ -120,6 +106,9 @@ void ModelPickerRouting::addBinaryVariableX(Warehouse warehouse) {
 
 
 void ModelPickerRouting::addBinaryVariableY(std::vector<int> verticesId) {
+    if (debug)
+        std::cout << "addBinaryVariableY" << std::endl;
+
     int verticesIdSize = verticesId.size();
     for (int i = 0; i < verticesIdSize; i++) {
         int id = verticesId[i];
@@ -131,6 +120,9 @@ void ModelPickerRouting::addBinaryVariableY(std::vector<int> verticesId) {
 
 
 void ModelPickerRouting::addVariableG(std::vector<int> verticesId) {
+    if (debug)
+        std::cout << "addVariableG" << std::endl;
+
     int verticesIdSize = verticesId.size();
     for (int i = 0; i < verticesIdSize; i++) {
         int id = verticesId[i];
@@ -148,6 +140,8 @@ void ModelPickerRouting::addConstraintVerticesToVisit(Warehouse warehouse, std::
 
     */
     // 1 * x1_2 + 1 * x_1_3 >= 1 //(2)obrigatoriedade de pegar vertice 1
+    if (debug)
+        std::cout << "addConstraintVerticesToVisit" << std::endl;
 
     for (int id : verticesToVisit) {
         std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
@@ -173,6 +167,8 @@ void ModelPickerRouting::addConstraintVerticeInAndOutMustBeEqual(Warehouse wareh
     */
     // x1_2 + x1_3 = x2_1 + x3_1 //(3)entrada e saida do vertice 1
     // x1_2 + x1_3 - x2_1 - x3_1 = 0
+    if (debug)
+        std::cout << "addConstraintVerticeInAndOutMustBeEqual" << std::endl;
 
     for (int id : verticesId) {
         std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
@@ -205,6 +201,8 @@ void ModelPickerRouting::addConstraintInAndOutOfVerticeZeroMustBeOne(Warehouse w
      // x0_2 + x0_4 = x2_0 + x4_0 = 1 //(4)entrada e saida do vertice 0 tem que ser igual a 1
      // x0_2 + x0_4 = 1 //(4) saida do vertice 0 igual a 1
     //  x2_0 + x4_0 = 1 //(4) entrada do vertice 0 igual a 1
+    if (debug)
+        std::cout << "addConstraintInAndOutOfVerticeZeroMustBeOne" << std::endl;
 
     std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(0);
     vector<string> colNamesIn;
@@ -242,6 +240,8 @@ void ModelPickerRouting::addConstraintSetVerticesOutdegree(Warehouse warehouse, 
 
     // x1_2 + x1_3 = g1 //(5)outdegree do vertice 1
     // x1_2 + x1_3 - g1 = 0
+    if (debug)
+        std::cout << "addConstraintSetVerticesOutdegree" << std::endl;
 
     for (int id : verticesId) {
         std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
@@ -271,6 +271,8 @@ void ModelPickerRouting::addConstraintSetVerticesYVariable(Warehouse warehouse, 
     */
     // y1 >= x1_2 //(6)
     // y1 - x1_2 >= 0
+    if (debug)
+        std::cout << "addConstraintSetVerticesYVariable" << std::endl;
 
     for (int id : verticesId) {
         std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
@@ -279,6 +281,8 @@ void ModelPickerRouting::addConstraintSetVerticesYVariable(Warehouse warehouse, 
 
         for (Adjacency adjacency : adjacencyList) {
             string colName = x + lex(id) + "_" + lex(adjacency.getId());
+            if (debug)
+                std::cout << colName << std::endl;
             colNames.push_back(colName);
             elements.push_back(-1);
             colNames.push_back(y + lex(id));
