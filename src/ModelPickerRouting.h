@@ -3,7 +3,7 @@
 
 #include "Model.h"
 #include "Solution.h"
-#include "Warehouse.h"
+#include "PickerRouting/Warehouse.h"
 
 /**
  * Branch and cut with formulation for incomplete graph

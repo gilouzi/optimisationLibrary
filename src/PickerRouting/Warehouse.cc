@@ -23,6 +23,16 @@ int Warehouse::getSize(int id_vertice)
 
 Adjacency Warehouse::getAdjacency(int id_1, int id_2)
 {
+    /*Adjacency adjacency;
+    std::vector<Adjacency> adjacencies = getAllAdjacencies(id_1);
+    int adjacenciesSize = adjacencies.size();
+    for (int i = 0; i < adjacenciesSize; i++){
+        adjacency = adjacencies[i];
+        if (adjacency.getId() == id_2) return adjacency;
+    }
+
+    Adjacency nullAdjacency;
+    return nullAdjacency;*/
     return warehouseAdjacencyList[id_1][id_2];
 }
 
