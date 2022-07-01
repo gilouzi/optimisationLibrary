@@ -23,6 +23,7 @@ class ModelPickerRouting : public Model {
         vector<double> sol_x;
         vector<string> sol_x_names;
 
+        set<int> verticesToVisit;
         virtual void reserveSolutionSpace(const Data* data);
         virtual void readSolution        (const Data* data);
         virtual void assignWarmStart     (const Data* data);

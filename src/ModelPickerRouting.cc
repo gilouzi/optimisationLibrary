@@ -144,6 +144,7 @@ void ModelPickerRouting::addConstraintVerticesToVisit(Warehouse warehouse, std::
         std::cout << "addConstraintVerticesToVisit" << std::endl;
 
     for (int id : verticesToVisit) {
+        this->verticesToVisit.insert(id);
         std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
         vector<string> colNames;
         vector<double> elements;
@@ -336,6 +337,7 @@ void ModelPickerRouting::assignWarmStart(const Data* data) {
 
 SubGraph ModelPickerRouting::createSubGraph(vector<double> sol) {
     vector<vector<int>> graph;
+    vector<vector<string>> id_out_edges;
     map<int, int> map_original_id_to_aux;
     map<int, int> map_aux_id_to_original;
 
@@ -343,7 +345,8 @@ SubGraph ModelPickerRouting::createSubGraph(vector<double> sol) {
         double colIndex = solver->getColIndex(sol_x_names[i]);
         double solutionValue = sol[colIndex];
         if (solutionValue == 1) {
-            Edge edge(sol_x_names[i]);
+            string x_name = sol_x_names[i];
+            Edge edge(x_name);
 
             //std::cout << sol_x_names[i] << " " << edge.getId_i() << " " << edge.getId_j() << " " << std::endl;
 
@@ -363,6 +366,9 @@ SubGraph ModelPickerRouting::createSubGraph(vector<double> sol) {
 
                 graph.push_back(vector<int>());
                 graph[aux_id_i].push_back(aux_id_j);
+
+                id_out_edges.push_back(vector<string>());
+                id_out_edges[aux_id_i].push_back(x_name);
             }
             else if (it_i == map_original_id_to_aux.end() && it_j != map_original_id_to_aux.end()) {
                 //id_i nao existe e id_j existe
@@ -373,6 +379,8 @@ SubGraph ModelPickerRouting::createSubGraph(vector<double> sol) {
                 map_aux_id_to_original.insert({ aux_id_i, id_i });
 
                 graph.push_back(vector<int> { aux_id_j });
+
+                id_out_edges.push_back(vector<string> {x_name});
             }
             else if (it_i == map_original_id_to_aux.end() && it_j == map_original_id_to_aux.end()) {
                 //nem id_i nem id_j existem
@@ -385,9 +393,11 @@ SubGraph ModelPickerRouting::createSubGraph(vector<double> sol) {
                 map_original_id_to_aux.insert({ id_j, aux_id_j });
                 map_aux_id_to_original.insert({ aux_id_j, id_j });
 
-
                 graph.push_back(vector<int> { aux_id_j });
                 graph.push_back(vector<int>());
+
+                id_out_edges.push_back(vector<string> {x_name});
+                id_out_edges.push_back(vector<string>());
             }
             else if (it_i != map_original_id_to_aux.end() && it_j != map_original_id_to_aux.end()) {
                 //id_i e id_j existem
@@ -395,11 +405,13 @@ SubGraph ModelPickerRouting::createSubGraph(vector<double> sol) {
                 int aux_id_j = it_j->second;
 
                 graph[aux_id_i].push_back(aux_id_j);
+
+                id_out_edges[aux_id_i].push_back(x_name);
             }
         }
     }
 
-    SubGraph subGraph(graph, map_original_id_to_aux, map_aux_id_to_original);
+    SubGraph subGraph(graph, map_aux_id_to_original, id_out_edges);
     return subGraph;
 }
 
@@ -468,14 +480,24 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
     printf("separation algorithm oooooooooooooooooooooooooooooooooooooooooooooooo\n");
     
     SubGraph subGraph = createSubGraph(sol);
+
     vector<vector<int>> graph = subGraph.getGraph();
+    map<int, int> map_aux_id_to_original = subGraph.getMapAuxIdToOriginal();
+    vector<vector<string>> id_out_edges = subGraph.getIdOutEdges();
+
     printGraph(graph);
+
     vector<int> component;
     vector<bool> visited(graph.size(), false);
+
     getNewComponent(subGraph.getGraph(), component, visited, 0);
     int idToExplore = getIdToExplore(visited);
 
-    for (int id : component) { std::cout << id << " "; }
+    for (int id : component) {
+        map<int, int>::iterator it = map_aux_id_to_original.find(id);
+        int original_id = it->second;
+        std::cout << id << "(" << original_id << ") ";
+    }
     std::cout << std::endl;
 
     while (idToExplore != -1) {
@@ -483,8 +505,57 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
         getNewComponent(subGraph.getGraph(), component, visited, idToExplore);
         idToExplore = getIdToExplore(visited);
 
-        for (int id : component) { std::cout << id << " "; }
+        bool addedY = false;
+        SolverCut cut;
+        cut.setSense('G');
+        cut.setRHS(0);
+
+        for (int id : component) { 
+            map<int, int>::iterator it = map_aux_id_to_original.find(id);
+            int original_id = it->second;
+            std::cout << id << "(" << original_id << ") "; 
+        }
+
         std::cout << std::endl;
+
+
+        for (int id : component) { 
+
+            map<int, int>::iterator it = map_aux_id_to_original.find(id);
+            int original_id = it->second;
+            //std::cout << id << "(" << original_id << ") ";
+
+
+            string variableName;
+            int col_index;
+
+
+            set<int>::iterator toVisitIt = verticesToVisit.find(original_id);
+            if ( !addedY && toVisitIt != verticesToVisit.end()) {
+                variableName = y + lex(original_id);
+                col_index = solver->getColIndex(variableName);
+                cut.addCoef(col_index, -1);
+                std::cout << "adding y of " << original_id << ": -" << variableName << ' ' << std::endl;
+
+                addedY = true;
+            }
+
+            variableName = g + lex(original_id);
+            col_index = solver->getColIndex(variableName);
+            cut.addCoef(col_index, 1);
+            std::cout << "adding g of " << original_id << ": " << variableName << ' ' << std::endl;
+
+            for (string x_name : id_out_edges[id]) {
+                col_index = solver->getColIndex(x_name);
+                cut.addCoef(col_index, -1);
+                std::cout << "adding x of " << original_id << ": -" << x_name << ' ' << std::endl;
+
+            }
+
+        }
+        std::cout << std::endl;
+
+        cuts.push_back(cut);
     }
 
     //criar função de pegar id1 e id2 de sol_x_names
