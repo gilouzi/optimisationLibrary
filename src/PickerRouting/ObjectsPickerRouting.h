@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-
+using std::string;
 using std::vector;
 using std::map;
 
@@ -41,14 +41,16 @@ class Edge {
 class SubGraph {
     private:
         vector<vector<int>> graph;
-        map<int, int> mapOriginalIdToAux;
         map<int, int> mapAuxIdToOriginal;
+        vector<vector<string>> idOutEdges;
     public:
-        SubGraph(vector<vector<int>> graph, map<int, int> mapOriginalIdToAux, map<int, int> mapAuxIdToOriginal);
+        SubGraph(vector<vector<int>> graph, map<int, int> mapAuxIdToOriginal, vector<vector<string>> idOutEdges);
         ~SubGraph();
         vector<vector<int>> getGraph() const { return graph; };
-        map<int, int> getMapOriginalIdToAux() const { return mapOriginalIdToAux; };
         map<int, int> getMapAuxIdToOriginal() const { return mapAuxIdToOriginal; };
+        vector<vector<string>> getIdOutEdges() const { return idOutEdges; };
+
+};
 
 };
 
