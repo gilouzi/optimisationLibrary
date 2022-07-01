@@ -428,6 +428,17 @@ void ModelPickerRouting::printGraph(vector<vector<int>> graph) {
 
     std::cout << std::endl;
 }
+
+void ModelPickerRouting::getNewComponent(vector<vector<int>> graph, vector<int> &component, vector<bool> &visited, int idToExplore) {
+    if (!visited[idToExplore]) {
+        component.push_back(idToExplore);
+        visited[idToExplore] = true;
+        for (int id : graph[idToExplore]) {
+            getNewComponent(graph, component, visited, id);
+        }
+    }
+
+}
 vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
 
     
@@ -448,7 +459,16 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
     printf("separation algorithm oooooooooooooooooooooooooooooooooooooooooooooooo\n");
     
     SubGraph subGraph = createSubGraph(sol);
-    printGraph(subGraph.getGraph());
+    vector<vector<int>> graph = subGraph.getGraph();
+    printGraph(graph);
+    vector<int> component;
+    vector<bool> visited(graph.size(), false);
+    getNewComponent(subGraph.getGraph(), component, visited, 0);
+
+    for (int id : component) {
+        std::cout << id << " ";
+    }
+    std::cout << std::endl;
 
     //criar função de pegar id1 e id2 de sol_x_names
     //se id1 nao existir em map, vai mapear ele para sua posição no graph

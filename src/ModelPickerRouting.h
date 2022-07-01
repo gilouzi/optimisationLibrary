@@ -30,6 +30,7 @@ class ModelPickerRouting : public Model {
         virtual void createModel         (const Data* data);
         
         SubGraph createSubGraph(vector<double> sol);
+        void getNewComponent(vector<vector<int>> graph, vector<int>& component, vector<bool>& visited, int idToExplore);
         void printGraph(vector<vector<int>> graph);
         void addBinaryVariableX(Warehouse warehouse);
         void addBinaryVariableY(std::vector<int> verticesId);
