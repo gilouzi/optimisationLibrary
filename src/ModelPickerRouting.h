@@ -29,6 +29,8 @@ class ModelPickerRouting : public Model {
         vector<SolverCut> separationAlgorithm(vector<double> sol);
         virtual void createModel         (const Data* data);
         
+        SubGraph createSubGraph(vector<double> sol);
+        void printGraph(vector<vector<int>> graph);
         void addBinaryVariableX(Warehouse warehouse);
         void addBinaryVariableY(std::vector<int> verticesId);
         void addVariableG(std::vector<int> verticesId);

@@ -3,6 +3,11 @@
 
 #include <string>
 #include <vector>
+#include <map>
+
+
+using std::vector;
+using std::map;
 
 enum class VerticeType {source, artificial, normal};
 
@@ -32,6 +37,21 @@ class Edge {
         int getId_i() const { return id_i; }
         int getId_j() const { return id_j; }
 };
+
+class SubGraph {
+    private:
+        vector<vector<int>> graph;
+        map<int, int> mapOriginalIdToAux;
+        map<int, int> mapAuxIdToOriginal;
+    public:
+        SubGraph(vector<vector<int>> graph, map<int, int> mapOriginalIdToAux, map<int, int> mapAuxIdToOriginal);
+        ~SubGraph();
+        vector<vector<int>> getGraph() const { return graph; };
+        map<int, int> getMapOriginalIdToAux() const { return mapOriginalIdToAux; };
+        map<int, int> getMapAuxIdToOriginal() const { return mapAuxIdToOriginal; };
+
+};
+
 class Adjacency {
     private:
         int id;

@@ -334,27 +334,7 @@ void ModelPickerRouting::assignWarmStart(const Data* data) {
 // Cutting plane
 
 
-vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
-
-    
-
-    vector<SolverCut> cuts;
-    // Finding out whether the current solution is integer or not
-    /*int isInteger = 1;
-    for (unsigned i = 0; i < sol.size(); i++) {
-        if (fabs(sol[i] - round(sol[i])) > TOLERANCE) {
-            printf("%.3f ", sol[i]);
-            isInteger = 0;
-            break;
-        }
-    }*/
-
-    //printf("%d %d", sol.size(), sol_x.size());
-
-    printf("separation algorithm oooooooooooooooooooooooooooooooooooooooooooooooo\n");
-
-    vector<string> verticesInSolution;
-    vector<int> visited;
+SubGraph ModelPickerRouting::createSubGraph(vector<double> sol) {
     vector<vector<int>> graph;
     map<int, int> map_original_id_to_aux;
     map<int, int> map_aux_id_to_original;
@@ -365,8 +345,7 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
         if (solutionValue == 1) {
             Edge edge(sol_x_names[i]);
 
-            std::cout << sol_x_names[i] << " " << edge.getId_i() << " " << edge.getId_j() << " " << std::endl;
-            verticesInSolution.push_back(sol_x_names[i]);
+            //std::cout << sol_x_names[i] << " " << edge.getId_i() << " " << edge.getId_j() << " " << std::endl;
 
             int id_i = edge.getId_i();
             int id_j = edge.getId_j();
@@ -375,8 +354,7 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
             map<int, int>::iterator it_j = map_original_id_to_aux.find(id_j);
 
             if (it_i != map_original_id_to_aux.end() && it_j == map_original_id_to_aux.end()) {
-               //id_i existe e id_j nao existe
-                printf("entrei aqui 1\n");
+                //id_i existe e id_j nao existe
                 int aux_id_i = it_i->second;
                 int aux_id_j = graph.size();
 
@@ -388,7 +366,6 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
             }
             else if (it_i == map_original_id_to_aux.end() && it_j != map_original_id_to_aux.end()) {
                 //id_i nao existe e id_j existe
-                printf("entrei aqui 2\n");
                 int aux_id_i = graph.size();
                 int aux_id_j = it_j->second;
 
@@ -399,7 +376,6 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
             }
             else if (it_i == map_original_id_to_aux.end() && it_j == map_original_id_to_aux.end()) {
                 //nem id_i nem id_j existem
-                printf("entrei aqui 3\n");
                 int aux_id_i = graph.size();
                 int aux_id_j = graph.size() + 1;
 
@@ -411,11 +387,10 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
 
 
                 graph.push_back(vector<int> { aux_id_j });
-                graph.push_back(vector<int> ());
+                graph.push_back(vector<int>());
             }
             else if (it_i != map_original_id_to_aux.end() && it_j != map_original_id_to_aux.end()) {
                 //id_i e id_j existem
-                printf("entrei aqui 4\n");
                 int aux_id_i = it_i->second;
                 int aux_id_j = it_j->second;
 
@@ -424,10 +399,15 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
         }
     }
 
-    int sizeWarehouse = graph.size();
-    std::cout << "Quantidade de vertices: " << sizeWarehouse << std::endl;
+    SubGraph subGraph(graph, map_original_id_to_aux, map_aux_id_to_original);
+    return subGraph;
+}
+
+void ModelPickerRouting::printGraph(vector<vector<int>> graph) {
+    int graphSize = graph.size();
+    std::cout << "Quantidade de vertices: " << graphSize << std::endl;
     std::cout << "Lista de adjacencia no formato (id, distancia):" << std::endl;
-    for (int i = 0; i < sizeWarehouse; i++)
+    for (int i = 0; i < graphSize; i++)
     {
         std::cout << "Vertice " << i << ": ";
         int adjacencyListSize = graph[i].size();
@@ -447,8 +427,28 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
     }
 
     std::cout << std::endl;
+}
+vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
 
-    int verticesInSolutionCount = verticesInSolution.size();
+    
+
+    vector<SolverCut> cuts;
+    // Finding out whether the current solution is integer or not
+    /*int isInteger = 1;
+    for (unsigned i = 0; i < sol.size(); i++) {
+        if (fabs(sol[i] - round(sol[i])) > TOLERANCE) {
+            printf("%.3f ", sol[i]);
+            isInteger = 0;
+            break;
+        }
+    }*/
+
+    //printf("%d %d", sol.size(), sol_x.size());
+
+    printf("separation algorithm oooooooooooooooooooooooooooooooooooooooooooooooo\n");
+    
+    SubGraph subGraph = createSubGraph(sol);
+    printGraph(subGraph.getGraph());
 
     //criar função de pegar id1 e id2 de sol_x_names
     //se id1 nao existir em map, vai mapear ele para sua posição no graph
@@ -460,14 +460,6 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
     //a partir do visited desse componente, adicionar o corte para esse componente
     //compensa ao inves do visited colocar um numero pro componente? (acho q n... melhor so pra cada rodada ir adicionando)
     //parar de achar novos componentes quanto tudo for visitado
-    for (int i = 0; i < verticesInSolutionCount; i++) {
-        string variableName = verticesInSolution[i];
-
-    }
-    string variableName = x + lex(0) + "_" + lex(6);
-    std::cout << variableName << "->" << sol[solver->getColIndex(variableName)] << std::endl;
-    variableName = x + lex(0) + "_" + lex(7);
-    std::cout << variableName << "->" << sol[solver->getColIndex(variableName)] << std::endl;
 
     printf("separation algorithm aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
     ///////

@@ -35,3 +35,12 @@ Edge::Edge(std::string xi_j)
 }
 
 Edge::~Edge() {}
+
+SubGraph::SubGraph(vector<vector<int>> graph, map<int, int> mapOriginalIdToAux, map<int, int> mapAuxIdToOriginal)
+{
+    this->graph = graph;
+    this->mapOriginalIdToAux = mapOriginalIdToAux;
+    this->mapAuxIdToOriginal = mapAuxIdToOriginal;
+}
+
+SubGraph::~SubGraph(){}
