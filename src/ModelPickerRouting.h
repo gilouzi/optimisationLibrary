@@ -8,6 +8,7 @@
 /**
  * Branch and cut with formulation for incomplete graph
  */
+
 class ModelPickerRouting : public Model {
 
     private:
@@ -25,6 +26,7 @@ class ModelPickerRouting : public Model {
         virtual void reserveSolutionSpace(const Data* data);
         virtual void readSolution        (const Data* data);
         virtual void assignWarmStart     (const Data* data);
+        vector<SolverCut> separationAlgorithm(vector<double> sol);
         virtual void createModel         (const Data* data);
         
         void addBinaryVariableX(Warehouse warehouse);

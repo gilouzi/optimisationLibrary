@@ -30,7 +30,7 @@ void ModelPickerRouting::execute(const Data* data) {
     setSolverParameters(0);
 
     solver->addInfoCallback(this);
-    //solver->addLazyCallback(this);
+    solver->addLazyCallback(this);
     //solver->addUserCutCallback(this);
 
     solve(data);
@@ -333,24 +333,143 @@ void ModelPickerRouting::assignWarmStart(const Data* data) {
 //////////////////////////////
 // Cutting plane
 
-/*
+
 vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
 
     
 
     vector<SolverCut> cuts;
-
     // Finding out whether the current solution is integer or not
-    int isInteger = 1;
+    /*int isInteger = 1;
     for (unsigned i = 0; i < sol.size(); i++) {
         if (fabs(sol[i] - round(sol[i])) > TOLERANCE) {
-            //printf("%.3f ", sol[i]);
+            printf("%.3f ", sol[i]);
             isInteger = 0;
             break;
         }
+    }*/
+
+    //printf("%d %d", sol.size(), sol_x.size());
+
+    printf("separation algorithm oooooooooooooooooooooooooooooooooooooooooooooooo\n");
+
+    vector<string> verticesInSolution;
+    vector<int> visited;
+    vector<vector<int>> graph;
+    map<int, int> map_original_id_to_aux;
+    map<int, int> map_aux_id_to_original;
+
+    for (int i = 0; i < xVariableCount; i++) {
+        double colIndex = solver->getColIndex(sol_x_names[i]);
+        double solutionValue = sol[colIndex];
+        if (solutionValue == 1) {
+            Edge edge(sol_x_names[i]);
+
+            std::cout << sol_x_names[i] << " " << edge.getId_i() << " " << edge.getId_j() << " " << std::endl;
+            verticesInSolution.push_back(sol_x_names[i]);
+
+            int id_i = edge.getId_i();
+            int id_j = edge.getId_j();
+
+            map<int, int>::iterator it_i = map_original_id_to_aux.find(id_i);
+            map<int, int>::iterator it_j = map_original_id_to_aux.find(id_j);
+
+            if (it_i != map_original_id_to_aux.end() && it_j == map_original_id_to_aux.end()) {
+               //id_i existe e id_j nao existe
+                printf("entrei aqui 1\n");
+                int aux_id_i = it_i->second;
+                int aux_id_j = graph.size();
+
+                map_original_id_to_aux.insert({ id_j, aux_id_j });
+                map_aux_id_to_original.insert({ aux_id_j, id_j });
+
+                graph.push_back(vector<int>());
+                graph[aux_id_i].push_back(aux_id_j);
+            }
+            else if (it_i == map_original_id_to_aux.end() && it_j != map_original_id_to_aux.end()) {
+                //id_i nao existe e id_j existe
+                printf("entrei aqui 2\n");
+                int aux_id_i = graph.size();
+                int aux_id_j = it_j->second;
+
+                map_original_id_to_aux.insert({ id_i, aux_id_i });
+                map_aux_id_to_original.insert({ aux_id_i, id_i });
+
+                graph.push_back(vector<int> { aux_id_j });
+            }
+            else if (it_i == map_original_id_to_aux.end() && it_j == map_original_id_to_aux.end()) {
+                //nem id_i nem id_j existem
+                printf("entrei aqui 3\n");
+                int aux_id_i = graph.size();
+                int aux_id_j = graph.size() + 1;
+
+                map_original_id_to_aux.insert({ id_i, aux_id_i });
+                map_aux_id_to_original.insert({ aux_id_i, id_i });
+
+                map_original_id_to_aux.insert({ id_j, aux_id_j });
+                map_aux_id_to_original.insert({ aux_id_j, id_j });
+
+
+                graph.push_back(vector<int> { aux_id_j });
+                graph.push_back(vector<int> ());
+            }
+            else if (it_i != map_original_id_to_aux.end() && it_j != map_original_id_to_aux.end()) {
+                //id_i e id_j existem
+                printf("entrei aqui 4\n");
+                int aux_id_i = it_i->second;
+                int aux_id_j = it_j->second;
+
+                graph[aux_id_i].push_back(aux_id_j);
+            }
+        }
     }
 
+    int sizeWarehouse = graph.size();
+    std::cout << "Quantidade de vertices: " << sizeWarehouse << std::endl;
+    std::cout << "Lista de adjacencia no formato (id, distancia):" << std::endl;
+    for (int i = 0; i < sizeWarehouse; i++)
+    {
+        std::cout << "Vertice " << i << ": ";
+        int adjacencyListSize = graph[i].size();
+        if (adjacencyListSize == 0)
+        {
+            std::cout << "vazio";
+        }
+        else
+        {
+            for (int j = 0; j < adjacencyListSize; j++)
+            {
+                std::cout << "(" << i << ", " << graph[i][j] << ") ";
+            }
+        }
 
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    int verticesInSolutionCount = verticesInSolution.size();
+
+    //criar função de pegar id1 e id2 de sol_x_names
+    //se id1 nao existir em map, vai mapear ele para sua posição no graph
+    //adiciona o id2 na posicao do id1 no graph como não visited
+    //roda bfs
+    //o primeiro name é sempre do vertice 0 entao pode começar da posição 0 do graph
+    //tudo que tiver como visited é o primeiro componente conexo ligado com o 0, deletar eles? ignorar?
+    //encontrar o proximo componente conexo a partir do primeiro ainda nao visitado
+    //a partir do visited desse componente, adicionar o corte para esse componente
+    //compensa ao inves do visited colocar um numero pro componente? (acho q n... melhor so pra cada rodada ir adicionando)
+    //parar de achar novos componentes quanto tudo for visitado
+    for (int i = 0; i < verticesInSolutionCount; i++) {
+        string variableName = verticesInSolution[i];
+
+    }
+    string variableName = x + lex(0) + "_" + lex(6);
+    std::cout << variableName << "->" << sol[solver->getColIndex(variableName)] << std::endl;
+    variableName = x + lex(0) + "_" + lex(7);
+    std::cout << variableName << "->" << sol[solver->getColIndex(variableName)] << std::endl;
+
+    printf("separation algorithm aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
     ///////
     // Cut example
     
@@ -368,4 +487,4 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
 
     return cuts;
 }
-*/
+

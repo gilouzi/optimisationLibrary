@@ -1,8 +1,8 @@
 #ifndef OBJECTSPICKERROUTING_HPP
 #define OBJECTSPICKERROUTING_HPP
 
-#include <vector>
 #include <string>
+#include <vector>
 
 enum class VerticeType {source, artificial, normal};
 
@@ -22,6 +22,16 @@ enum class VerticeType {source, artificial, normal};
 //    float distance;
 //};
 
+class Edge {
+    private:
+        int id_i;
+        int id_j;
+    public:
+        Edge(std::string xi_j);
+        ~Edge();
+        int getId_i() const { return id_i; }
+        int getId_j() const { return id_j; }
+};
 class Adjacency {
     private:
         int id;
