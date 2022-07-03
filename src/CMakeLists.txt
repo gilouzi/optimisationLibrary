@@ -30,6 +30,10 @@ add_executable(${OPTLIB_COMPILED}
       ModelPickerRouting.h                  ModelPickerRouting.cc
       PickerRouting/ObjectsPickerRouting.h  PickerRouting/ObjectsPickerRouting.cc
       PickerRouting/Warehouse.h             PickerRouting/Warehouse.cc
+      PickerRouting/FileReader.h            PickerRouting/FileReader.cc
+      PickerRouting/Orders.h                PickerRouting/Orders.cc
+      PickerRouting/Products.h              PickerRouting/Products.cc
+      PickerRouting/PickerRouting.h         PickerRouting/PickerRouting.cc
       )
 
 # Added private defininition of throw_exception to Util.h

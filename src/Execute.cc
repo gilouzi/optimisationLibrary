@@ -10,6 +10,8 @@
 #include "Options.h"
 #include "DataCapitalBudgeting.h"
 #include "ModelCapitalBudgeting.h"
+#include "DataPickerRouting.h"
+#include "ModelPickerRouting.h"
 
 
 Execute::Execute() {
@@ -28,8 +30,8 @@ void Execute::execute() {
     float startTime = Util::getTime();
      
     if (Options::getInstance()->getStringOption("model").compare("toy") == 0) {
-        data  = new DataCapitalBudgeting();
-        model = new ModelCapitalBudgeting();
+        data = new DataPickerRouting("filename");
+        model = new ModelPickerRouting();
     } else {
         data  = new Data();
         model = new Model();

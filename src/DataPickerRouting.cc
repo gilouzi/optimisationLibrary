@@ -1,5 +1,8 @@
 #include "DataPickerRouting.h"
 #include "Options.h"
+#include "PickerRouting/PickerRouting.h"
+#include "PickerRouting/Products.h"
+#include "PickerRouting/Orders.h"
 
 
 DataPickerRouting::DataPickerRouting(std::string fileName) : Data(){
@@ -12,31 +15,37 @@ DataPickerRouting::~DataPickerRouting() {
 void DataPickerRouting::readData() {
     if (debug) printf("Initialising data for picker routing problem\n\n");
 
-    /*WarehouseInstance warehouseInstance("../instances/warehouses/warehouse_8_1_3_1560");
+    PickerRouting pickerRouting("../../../instances/warehouses/warehouse_8_0_3_1560");
 
-    string productsFile = "../instances/products/productsDB_1560_locations";
-    int minimum_products_required = warehouseInstance.get_minimum_products_required();
-    std::vector<int> locationsVertice = warehouseInstance.get_locations_vertice();
-    ProductsInstance productsInstance(productsFile, minimum_products_required, locationsVertice);
+    printf("Initialized picker routing\n");
 
-    string ordersFile = "../instances/orders/instances_d5_ord11";
-    int totalVertices = warehouseInstance.get_total_vertices();
+    string productsFile = "../../../instances/products/productsDB_1560_locations";
+    int minimum_products_required = pickerRouting.get_minimum_products_required();
+    std::vector<int> locationsVertice = pickerRouting.get_locations_vertice();
+    Products productsInstance(productsFile, minimum_products_required, locationsVertice);
+
+    string ordersFile = "../../../instances/orders/instances_d5_ord5";
+    int totalVertices = pickerRouting.get_total_vertices();
     vector<int> productsVertice = productsInstance.get_products_vertice();
-    OrdersInstance ordersInstance(ordersFile, totalVertices, productsVertice);
+    Orders ordersInstance(ordersFile, totalVertices, productsVertice);
     vector<int> verticesToVisit = ordersInstance.get_vertices_to_visit();
     
-    Warehouse warehouse = warehouseInstance.get_warehouse();
-    vector<vertice_type> verticesType = warehouseInstance.get_vertices_type();
-    int numVertices = warehouseInstance.get_total_vertices();
-    warehouse.reduce_graph(totalVertices, verticesToVisit, verticesType);
+    Warehouse warehouse = pickerRouting.get_warehouse();
+    vector<VerticeType> verticesType = pickerRouting.get_vertices_type();
+    int numVertices = pickerRouting.get_total_vertices();
+    warehouse.reduceGraph(totalVertices, verticesToVisit, verticesType);
 
     this->warehouse = warehouse;
-    this->verticesToVisit = verticesToVisit;
+    for (int i = 0; i < verticesToVisit.size(); i++) {
+        if (verticesToVisit[i] == 1) this->verticesToVisit.push_back(i);
+    }
+    //this->verticesToVisit = verticesToVisit;
+
     verticesId = warehouse.getVerticesWithAdjacency();
-    */
+    
 
     //mock:
-    Warehouse warehouse(12);
+    /*Warehouse warehouse(12);
 
     warehouse.addNewAdjacency(0, 6, 10);
     warehouse.addNewAdjacency(6, 0, 10);
@@ -90,8 +99,8 @@ void DataPickerRouting::readData() {
     verticesToVisit.push_back(3);
     verticesToVisit.push_back(4);
     verticesToVisit.push_back(5);
+    verticesId = warehouse.getVerticesWithAdjacency();*/
 
-    verticesId = warehouse.getVerticesWithAdjacency();
 
 }
 

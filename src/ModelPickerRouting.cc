@@ -277,13 +277,12 @@ void ModelPickerRouting::addConstraintSetVerticesYVariable(Warehouse warehouse, 
 
     for (int id : verticesId) {
         std::vector<Adjacency> adjacencyList = warehouse.getAllAdjacencies(id);
-        vector<string> colNames;
-        vector<double> elements;
 
         for (Adjacency adjacency : adjacencyList) {
+            vector<string> colNames;
+            vector<double> elements;
+
             string colName = x + lex(id) + "_" + lex(adjacency.getId());
-            if (debug)
-                std::cout << colName << std::endl;
             colNames.push_back(colName);
             elements.push_back(-1);
             colNames.push_back(y + lex(id));
@@ -291,6 +290,8 @@ void ModelPickerRouting::addConstraintSetVerticesYVariable(Warehouse warehouse, 
 
             string constraintName = "constraint: y" + lex(id) + ">= " + colName;
             solver->addRow(colNames, elements, 0, 'G', constraintName);
+            if (debug)
+                std::cout << "-" << colName << " +" << y + lex(id) << std::endl;
         }
     }
 }

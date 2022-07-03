@@ -8,6 +8,14 @@ Adjacency::Adjacency(int id, float distance)
 }
 
 Adjacency::~Adjacency() {}
+
+SearchVertice::SearchVertice(int id)
+{
+	this->id = id;
+}
+
+SearchVertice::~SearchVertice() {}
+
 Edge::Edge(std::string xi_j)
 {
     int i = 1;

@@ -24,6 +24,8 @@ class ModelPickerRouting : public Model {
         vector<string> sol_x_names;
 
         set<int> verticesToVisit;
+        set<int> idAddedOnYCut;
+
         virtual void reserveSolutionSpace(const Data* data);
         virtual void readSolution        (const Data* data);
         virtual void assignWarmStart     (const Data* data);
