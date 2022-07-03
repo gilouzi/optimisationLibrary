@@ -5,7 +5,7 @@ using namespace std;
 int INPUT_PARAMETERS_QUANTITY = 9;
 int DATA_QUANTITY = 6;
 
-PickerRouting::PickerRouting(string fileName)
+PickerRouting::PickerRouting(string fileName, int debug)
 {
     string warehouseFileLine;
     ifstream warehouseFile(fileName);
@@ -14,16 +14,19 @@ PickerRouting::PickerRouting(string fileName)
     while (getline(warehouseFile, warehouseFileLine))
     {
         string command = file_reader.getCommand(warehouseFileLine);
-        if (command == "INPUT_PARAMETERS")
-        {
+
+        if (debug > 3)
             cout << "command: " << command << endl;
 
+        if (command == "INPUT_PARAMETERS")
+        {
             for (int i = 0; i < INPUT_PARAMETERS_QUANTITY; i++)
             {
                 getline(warehouseFile, warehouseFileLine);
 
                 parameter_t parameter = file_reader.getParameter(warehouseFileLine);
-                cout << parameter.name << " " << parameter.value << endl;
+                if (debug > 3)
+                    cout << parameter.name << " " << parameter.value << endl;
 
                 save_input_parameter(parameter);
             }
@@ -31,22 +34,20 @@ PickerRouting::PickerRouting(string fileName)
 
         if (command == "DATA")
         {
-            cout << "command: " << command << endl;
             for (int i = 0; i < DATA_QUANTITY; i++)
             {
                 //TODO: arrumar o getParameter para quando parametro é o crossAislesPositions (possui dois valores)
                 getline(warehouseFile, warehouseFileLine);
 
                 parameter_t parameter = file_reader.getParameter(warehouseFileLine);
-                cout << parameter.name << " " << parameter.value << endl;
+                if (debug > 3)
+                    cout << parameter.name << " " << parameter.value << endl;
                 save_data_parameter(parameter);
             }
         }
 
         if (command == "vertices_pick_which_locations")
         {
-            cout << "command: " << command << endl;
-
             int totalVertices = get_total_vertices();
             vector<VerticeType> verticesType(totalVertices);
             int totalLocations = get_total_locations();
@@ -71,30 +72,30 @@ PickerRouting::PickerRouting(string fileName)
             this->verticesType = verticesType;
             this->locationsVertice = locationsVertice;
 
-            /*cout << endl
-                 << "verticesType" << endl;
-            for (int i = 0; i < totalVertices; i++)
-            {
-                cout << i << ": " << verticesType[i] << endl;
-            }*/
-            cout << endl
-                 << "locationsVertice" << endl;
-            for (int i = 0; i < totalLocations; i++)
-            {
-                cout << i << ": " << locationsVertice[i] << endl;
+            if (debug > 3) {
+                /*cout << endl
+                     << "verticesType" << endl;
+                for (int i = 0; i < totalVertices; i++)
+                {
+                    cout << i << ": " << verticesType[i] << endl;
+                }*/
+                cout << endl
+                     << "locationsVertice" << endl;
+                for (int i = 0; i < totalLocations; i++)
+                {
+                    cout << i << ": " << locationsVertice[i] << endl;
+                }
             }
         }
 
         if (command == "arcs_distances")
         {
-            cout << "command: " << command << endl;
             int totalVertices = get_total_vertices();
             Warehouse warehouse(totalVertices);
 
             for (int i = 0; i < totalVertices; i++)
             {
                 getline(warehouseFile, warehouseFileLine);
-                cout << warehouseFileLine << endl;
                 arcs_distances_t arcs_distances = file_reader.getArcsDistances(warehouseFileLine);
                 int vertices_size = arcs_distances.vertices.size();
                 for (int j = 0; j < vertices_size; j++)
@@ -105,20 +106,23 @@ PickerRouting::PickerRouting(string fileName)
             }
 
             this->warehouse = warehouse;
-            cout << endl
-                 << "warehouse:" << endl;
-            this->warehouse.printWarehouse();
+            if (debug > 3) {
+                cout << endl
+                     << "warehouse:" << endl;
+                this->warehouse.printWarehouse();
+            }
         }
 
         if (command == "position_artificial_vertices_aisle_block")
         {
-            cout << "command: " << command << endl;
             int numArtificialVertices = get_num_artificial_vertices();
 
             int numAisles = get_num_aisles();
             int numCrossAisles = get_num_cross_aisles();
             vector<vector<int>> aisles(numCrossAisles, vector<int>(numAisles));
-            cout << "numAisles: " << numAisles << ", numCrossAisles: " << numCrossAisles << endl;
+
+            if (debug > 3)
+                cout << "numAisles: " << numAisles << ", numCrossAisles: " << numCrossAisles << endl;
 
             for (int i = 0; i < numArtificialVertices; i++)
             {
@@ -128,8 +132,10 @@ PickerRouting::PickerRouting(string fileName)
                 int crossAisle = position_artificial_vertices.crossAisle;
                 int pickAisle = position_artificial_vertices.pickAisle;
                 int vertice_id = position_artificial_vertices.vertice_id;
-                cout << "crossAisle: " << crossAisle << ", pickAisle: " << pickAisle << ", vertice_id: " << vertice_id << endl;
                 aisles[crossAisle][pickAisle] = vertice_id;
+
+                if (debug > 3)
+                    cout << "crossAisle: " << crossAisle << ", pickAisle: " << pickAisle << ", vertice_id: " << vertice_id << endl;
             }
 
             this->aisles = aisles;

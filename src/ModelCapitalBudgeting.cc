@@ -46,7 +46,7 @@ void ModelCapitalBudgeting::execute(const Data* data) {
 
 
 void ModelCapitalBudgeting::printSolutionVariables(int digits, int decimals) {
-    if (debug) {
+    if (debug > 2) {
         printf("\nSolution: \n");
         for (int i = 0; i < V; i++) {
             printf("  x%d = %.0f\n", i, sol_x[i]);

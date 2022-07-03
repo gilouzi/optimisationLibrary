@@ -2,15 +2,12 @@
 
 using namespace std;
 
-Orders::Orders(string fileName, int totalVertices, vector<int> productsVertice)
+Orders::Orders(string fileName, int totalVertices, vector<int> productsVertice, int debug)
 {
     FILE *file;
     char char_np[20], char_p[20], char_q[20];
     int ordersQuantity, numProducts, product, quantity;
     vector<int> verticesToVisit(totalVertices, 0);
-
-    /*char nameFile[fileName.length() + 1];
-    strcpy(nameFile, fileName.c_str());*/
 
     file = fopen(fileName.c_str(), "r");
 
@@ -32,11 +29,13 @@ Orders::Orders(string fileName, int totalVertices, vector<int> productsVertice)
 
     this->verticesToVisit = verticesToVisit;
 
-    cout << endl
-         << "verticesToVisit" << endl;
-    for (int i = 0; i < totalVertices; i++)
-    {
-        cout << i << ": " << verticesToVisit[i] << endl;
+    if (debug > 3) {
+        cout << endl
+             << "verticesToVisit" << endl;
+        for (int i = 0; i < totalVertices; i++)
+        {
+            cout << i << ": " << verticesToVisit[i] << endl;
+        }
     }
 }
 

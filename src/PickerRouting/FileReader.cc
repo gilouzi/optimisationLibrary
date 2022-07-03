@@ -105,13 +105,6 @@ position_artificial_vertices_t FileReader::getPositionArtificialVertice(string l
 
 string FileReader::getCommand(string line)
 {
-    /*int n = line.length();
-    if (n == 0)
-        return "";
-
-    char line_char[n + 1];
-    strcpy(line_char, line.c_str());*/
-
     char command[100];
     sscanf(line.c_str(), "%s", command);
 

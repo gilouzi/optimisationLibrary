@@ -13,7 +13,7 @@ private:
     std::vector<int> productsVertice;
 
 public:
-    Products(std::string fileName, int minimum_products_required, std::vector<int> locationsVertice);
+    Products(std::string fileName, int minimum_products_required, std::vector<int> locationsVertice, int debug);
     ~Products();
     std::vector<int> get_products_vertice();
 };

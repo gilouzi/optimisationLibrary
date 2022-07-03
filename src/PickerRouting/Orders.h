@@ -13,7 +13,7 @@ private:
     std::vector<int> verticesToVisit;
 
 public:
-    Orders(std::string fileName, int totalVertices, std::vector<int> productsVertice);
+    Orders(std::string fileName, int totalVertices, std::vector<int> productsVertice, int debug);
     ~Orders();
     std::vector<int> get_vertices_to_visit();
 };

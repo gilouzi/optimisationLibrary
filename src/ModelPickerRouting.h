@@ -19,12 +19,11 @@ class ModelPickerRouting : public Model {
         string g;
         
         // Solution values
-        int xVariableCount;
         vector<double> sol_x;
         vector<string> sol_x_names;
 
+        int xVariableCount;
         set<int> verticesToVisit;
-        set<int> idAddedOnYCut;
 
         virtual void reserveSolutionSpace(const Data* data);
         virtual void readSolution        (const Data* data);

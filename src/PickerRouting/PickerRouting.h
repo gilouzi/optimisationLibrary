@@ -20,7 +20,7 @@ private:
     data_parameters_t dataParameters;
 
 public:
-    PickerRouting(std::string fileName);
+    PickerRouting(std::string fileName, int debug);
     ~PickerRouting();
 
     //SAVE PARAMETERS
