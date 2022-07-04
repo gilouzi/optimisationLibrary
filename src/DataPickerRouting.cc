@@ -3,6 +3,7 @@
 #include "PickerRouting/PickerRouting.h"
 #include "PickerRouting/Products.h"
 #include "PickerRouting/Orders.h"
+#include "PickerRouting/TestInstance.h"
 
 
 DataPickerRouting::DataPickerRouting(std::string fileName) : Data(){
@@ -15,7 +16,11 @@ DataPickerRouting::~DataPickerRouting() {
 void DataPickerRouting::readData() {
     if (debug) printf("Initialising data for picker routing problem\n\n");
 
-    PickerRouting pickerRouting("../../../instances/warehouses/warehouse_8_0_3_1560", debug);
+    TestInstance testInstance;
+    this->warehouse = testInstance.get_warehouse_7();
+    vector<int> verticesToVisit = testInstance.get_vertices_to_visit_7();
+
+   /* PickerRouting pickerRouting("../../../instances/warehouses/warehouse_8_0_3_1560", debug);
 
     string productsFile = "../../../instances/products/productsDB_1560_locations";
     int minimum_products_required = pickerRouting.get_minimum_products_required();
@@ -33,12 +38,14 @@ void DataPickerRouting::readData() {
     int numVertices = pickerRouting.get_total_vertices();
     warehouse.reduceGraph(totalVertices, verticesToVisit, verticesType);
 
-    verticesId = warehouse.getVerticesWithAdjacency();
     this->warehouse = warehouse;
+    */
+
+    verticesId = warehouse.getVerticesWithAdjacency();
     for (int i = 0; i < verticesToVisit.size(); i++) {
         if (verticesToVisit[i] == 1) this->verticesToVisit.push_back(i);
     }
-   
+    
 
 
 }

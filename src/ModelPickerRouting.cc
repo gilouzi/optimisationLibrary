@@ -535,6 +535,8 @@ vector<SolverCut> ModelPickerRouting::separationAlgorithm(vector<double> sol) {
         cuts.push_back(cut);
     }
 
+    if (debug > 3)
+        std::cout << "cuts size = " << cuts.size() << std::endl;
     return cuts;
 }
 
